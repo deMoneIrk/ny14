@@ -1,3 +1,65 @@
 body {
 	background-color: #1e2d3a;
 }
+
+.elka {
+	display: block;
+	height: 106px;
+	position: relative;
+	width: 150px;
+}
+
+.elka i {
+	display: block;
+	height: 106px;
+	position: absolute;
+	top: 0px;
+}
+
+.elka-yellow i { background-image: url(e1.png) }
+.elka-green i { background-image: url(e4.png) }
+.elka-blue i { background-image: url(e3.png) }
+.elka-red i { background-image: url(e2.png) }
+
+.elka .i0 {
+	background-position: 0 -106px;
+	left: 0px;
+	width: 31px;
+}
+
+.elka .i1 {
+	background-position: -33px -106px;
+	left: 24px;
+	width: 54px;
+}
+
+.elka .i2 {
+	background-position: -90px -106px;
+	left: 53px;
+	width: 48px;
+}
+
+.elka .i3 {
+	background-position: -139px -106px;
+	left: 79px;
+	width: 41px;
+}
+
+.elka .i4 {
+	background-position: -182px -106px;
+	left: 101px;
+	width: 28px;
+}
+
+.elka .i5 {
+	background-position: -212px -106px;
+	left: 122px;
+	width: 28px;
+}
+
+.elka-frozen .i0 { background-position: 0 0 }
+.elka-frozen .i1 { background-position: -33px 0 }
+.elka-frozen .i2 { background-position: -90px 0 }
+.elka-frozen .i3 { background-position: -139px 0 }
+.elka-frozen .i4 { background-position: -182px 0 }
+.elka-frozen .i5 { background-position: -212px 0 }
