@@ -1,6 +1,33 @@
 $(function() {
-	var isChrome = navigator.userAgent.indexOf('Chrome') !== -1,
-		players = [], dimensions = [];
+	var path = 'gfx/', players = [], dimensions = [];
+
+	this.bgManager = function() {
+		this.bg = {
+			1: [5, {1: 1648, 2: 1626, 3: 1829, 4: 1394, 5: 3930}, 0],
+			2: [8, {1: 464, 2: 1645, 3: 1246, 4: 3096, 5: 2681, 6: 1271, 7: 1150, 8: 1578}, 0],
+			3: [8, {1: 793, 2: 1998, 3: 1134, 4: 2655, 5: 1917, 6: 1242, 7: 1530, 8: 2340}, 0]
+		};
+
+		this.getNextItem = function(i) {
+			var item = $('<div></div>'), parent = $('.bg' + i), prev = parent.find('div:last-child'), k;
+
+			do {
+				k = Math.round(Math.random() * (this.bg[i][0] - 1) + 1);
+			} while (k == prev.data('k'));
+
+			item.data('k', k).css({backgroundImage: 'url(' + path + 'bg' + i + '-' + k + '.png)', width: this.bg[i][1][k]}).appendTo(parent);
+
+			this.bg[i][2] += this.bg[i][1][k];
+		}
+
+		for (var i = 0; i < 20; i++) {
+			this.getNextItem(1);
+			this.getNextItem(2);
+			this.getNextItem(3);
+		}
+	}
+
+	this.bgManager();
 
 	var Player = function(color) {
 		this.moveValue = 0.1;
@@ -77,7 +104,7 @@ $(function() {
 		}
 
 		if (prevPos[0] != this.pos[0] || prevPos[1] != this.pos[1])
-			this.elka.css('transform', 'translate' + (isChrome ? '3d' : '') + '(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (isChrome ? ', 0px' : '') + ')');
+			this.elka.css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') + '(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
 	}
 
 	$(window).on('resize', function() {

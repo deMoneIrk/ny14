@@ -3,11 +3,30 @@ body {
 	overflow: hidden;
 }
 
+.bg {
+	bottom: 0px;
+	display: block;
+	position: absolute;
+	width: 50000px;
+}
+
+.bg div {
+	background-position: bottom;
+	background-repeat: no-repeat;
+	float: left;
+	display: block;
+}
+
+.bg1 div { height: 251px }
+.bg2 div { height: 482px }
+.bg3 div { height: 564px }
+
 .elka {
 	display: block;
 	height: 106px;
 	position: relative;
 	width: 150px;
+	z-index: 100;
 }
 
 .elka i {
