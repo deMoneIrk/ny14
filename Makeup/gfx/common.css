@@ -21,6 +21,13 @@ body {
 .bg2 div { height: 482px }
 .bg3 div { height: 564px }
 
+canvas {
+	left: 0px;
+	position: absolute;
+	top: 0px;
+	z-index: 300;
+}
+
 .elka {
 	display: block;
 	height: 106px;
@@ -86,6 +93,7 @@ body {
 .elka-frozen .i5 { background-position: -212px 0 }
 
 .thing {
+	background-color: #fff;
 	color: #fff;
 	display: block;
 	font-size: 16px;
@@ -94,4 +102,5 @@ body {
 	text-align: center;
 	top: 0px;
 	vertical-align: middle;
+	z-index: 150;
 }
