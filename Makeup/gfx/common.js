@@ -1,30 +1,89 @@
+(function() {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
+                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
+    }
+
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}());
+
 $(function() {
-	var path = 'gfx/', players = [], dimensions = [];
+	stop = false;
+	var path = 'gfx/', players = [], dimensions = [], that = this;
+
+	this.bgSpeed = 10;
+	this.tickList = [];
+	this.tickFunctionAdd = function(i) { this.tickList.push(i); };
+
+	this.tickEvent = function() {
+		if (!stop) requestAnimationFrame(arguments.callee);
+		for(var i in that.tickList) that.tickList[i]();
+	}; this.tickEvent();
 
 	this.bgManager = function() {
+		var $this = this;
+
 		this.bg = {
-			1: [5, {1: 1648, 2: 1626, 3: 1829, 4: 1394, 5: 3930}, 0],
-			2: [8, {1: 464, 2: 1645, 3: 1246, 4: 3096, 5: 2681, 6: 1271, 7: 1150, 8: 1578}, 0],
-			3: [8, {1: 793, 2: 1998, 3: 1134, 4: 2655, 5: 1917, 6: 1242, 7: 1530, 8: 2340}, 0]
+			1: [5, {1: 1648, 2: 1626, 3: 1829, 4: 1394, 5: 3930}, 0, 0, $('.bg1')],
+			2: [8, {1: 464, 2: 1645, 3: 1246, 4: 3096, 5: 2681, 6: 1271, 7: 1150, 8: 1578}, 0, 0, $('.bg2')],
+			3: [8, {1: 793, 2: 1998, 3: 1134, 4: 2655, 5: 1917, 6: 1242, 7: 1530, 8: 2340}, 0, 0, $('.bg3')]
 		};
 
 		this.getNextItem = function(i) {
 			var item = $('<div></div>'), parent = $('.bg' + i), prev = parent.find('div:last-child'), k;
 
-			do {
-				k = Math.round(Math.random() * (this.bg[i][0] - 1) + 1);
-			} while (k == prev.data('k'));
-
+			do { k = Math.round(Math.random() * (this.bg[i][0] - 1) + 1); } while (k == prev.data('k'));
 			item.data('k', k).css({backgroundImage: 'url(' + path + 'bg' + i + '-' + k + '.png)', width: this.bg[i][1][k]}).appendTo(parent);
 
 			this.bg[i][2] += this.bg[i][1][k];
 		}
 
-		for (var i = 0; i < 20; i++) {
+		for (var i = 0; i < 5; i++) {
 			this.getNextItem(1);
 			this.getNextItem(2);
 			this.getNextItem(3);
 		}
+
+		this.moveLines = function() {
+			var multiply = [0, 0.9, 0.6, 0.3];
+
+			for (var i = 1; i < 4; i++) {
+				$this.bg[i][3] = $this.bg[i][3] - multiply[i] * that.bgSpeed;
+				$this.bg[i][4].css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') + '(' + ($this.bg[i][3]) + 'px, 0px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
+
+				if (!$this.bg[i][5])
+					$this.bg[i].push($this.bg[i][4][0].firstChild);
+
+				var ew = parseInt($this.bg[i][5].style.width);
+				if (ew < -$this.bg[i][3]) {
+					$this.bg[i][5].parentNode.removeChild($this.bg[i][5]);
+					$this.bg[i].pop();
+
+					$this.bg[i][3] += ew;
+					$this.bg[i][4].css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') + '(' + ($this.bg[i][3]) + 'px, 0px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
+
+					$this.getNextItem(i);
+				}
+			}
+		}
+
+		that.tickFunctionAdd(function() { $this.moveLines(); });
 	}
 
 	this.bgManager();
@@ -47,7 +106,7 @@ $(function() {
 		var $this = this;
 
 		$(document).on('keydown keyup', function(e) { $this.key(e) });
-		setInterval(function() { $this.tick() }, 10);
+		that.tickFunctionAdd(function() { $this.tick() });
 	}
 
 	var proto = Player.prototype;
@@ -108,7 +167,7 @@ $(function() {
 	}
 
 	$(window).on('resize', function() {
-		dimensions = [$(document).width(), $(document).height()];
+		dimensions = [$(window).width(), $(window).height()];
 	}).trigger('resize');
 
 	players[0] = new Player();
