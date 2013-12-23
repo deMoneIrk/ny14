@@ -34,7 +34,9 @@ $(function() {
 		dimensions = [$(window).width(), $(window).height()];
 	}).trigger('resize');
 
+	this.addThingMinTime = 1000;
 	this.bgSpeed = 5;
+	this.itemSpeed = 10;
 	this.tickList = {};
 	this.tickFunctionAdd = function(i) { var k = 'i' + Math.random(); this.tickList[k] = i; return k; };
 	this.tickFunctionRemove = function(i) { delete this.tickList[i]; return true; };
@@ -188,8 +190,6 @@ $(function() {
 		}
 	};
 
-	this.itemSpeed = 10;
-
 	var Thing = function(type, id) {
 		var $this = this;
 
@@ -225,9 +225,16 @@ $(function() {
 			'(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
 	}
 
-	var i = 0;
-	setInterval(function() {
-		things[i++] = new Thing('box', i - 1);
-		console.log(things);
-	}, 1000);
+	var addThingTime = new Date().getTime();
+	addThing = function() {
+		var now = new Date().getTime(), dt = now - (addThingTime || now);
+		if (dt > that.addThingMinTime) {
+			addThingTime = now;
+
+			var id = 'i' + Math.random();
+			things[id] = new Thing('box', id);
+		}
+	} this.tickFunctionAdd(addThing);
+
+	
 });
