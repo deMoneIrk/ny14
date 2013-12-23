@@ -1,3 +1,6 @@
+/**
+ * Взрывы: http://www.gameplaypassion.com/blog/explosion-effect-html5-canvas/
+ * */
 (function() {
     var lastTime = 0;
     var vendors = ['ms', 'moz', 'webkit', 'o'];
@@ -25,18 +28,24 @@
 
 $(function() {
 	stop = false;
-	var path = 'gfx/', players = [], dimensions = [], that = this;
+	var path = 'gfx/', players = [], dimensions = [0, 0], things = [], that = this;
 
-	this.bgSpeed = 10;
-	this.tickList = [];
-	this.tickFunctionAdd = function(i) { this.tickList.push(i); };
+	$(window).on('resize', function() {
+		dimensions = [$(window).width(), $(window).height()];
+	}).trigger('resize');
+
+	this.bgSpeed = 5;
+	this.tickList = {};
+	this.tickFunctionAdd = function(i) { var k = 'i' + Math.random(); this.tickList[k] = i; return k; };
+	this.tickFunctionRemove = function(i) { delete this.tickList[i]; return true; };
 
 	this.tickEvent = function() {
 		if (!stop) requestAnimationFrame(arguments.callee);
 		for(var i in that.tickList) that.tickList[i]();
 	}; this.tickEvent();
 
-	this.bgManager = function() {
+	// background manager
+	(function() {
 		var $this = this;
 
 		this.bg = {
@@ -49,7 +58,10 @@ $(function() {
 			var item = $('<div></div>'), parent = $('.bg' + i), prev = parent.find('div:last-child'), k;
 
 			do { k = Math.round(Math.random() * (this.bg[i][0] - 1) + 1); } while (k == prev.data('k'));
-			item.data('k', k).css({backgroundImage: 'url(' + path + 'bg' + i + '-' + k + '.png)', width: this.bg[i][1][k]}).appendTo(parent);
+			item.data('k', k).css({
+				backgroundImage: 'url(' + path + 'bg' + i + '-' + k + '.png)',
+				width: this.bg[i][1][k]
+			}).appendTo(parent);
 
 			this.bg[i][2] += this.bg[i][1][k];
 		}
@@ -60,8 +72,8 @@ $(function() {
 			this.getNextItem(3);
 		}
 
-		this.moveLines = function() {
-			var multiply = [0, 0.9, 0.6, 0.3];
+		that.tickFunctionAdd(function() {
+			var multiply = [0, 0.9, 0.5, 0.2];
 
 			for (var i = 1; i < 4; i++) {
 				$this.bg[i][3] = $this.bg[i][3] - multiply[i] * that.bgSpeed;
@@ -81,27 +93,23 @@ $(function() {
 					$this.getNextItem(i);
 				}
 			}
-		}
-
-		that.tickFunctionAdd(function() { $this.moveLines(); });
-	}
-
-	this.bgManager();
+		});
+	}());
 
 	var Player = function(color) {
-		this.moveValue = 0.1;
+		this.moveValue = 0.3;
 
 		this.pos = [0, 0];
 		this.max = [6, 6];
+		this.score = 0;
 		this.speed = [0, 0];
 		this.moving = [0, 0];
 		this.dimensions = [150, 106];
 
-		this.elka = false;
+		this.color = color || ['yellow', 'green', 'blue', 'red'][Math.floor(Math.random() * 4)];
 
-		this.color = color || 'yellow';
-
-		this.build();
+		this.elka = $('<div class="elka elka-' + this.color + ' elka-normal"><i class="i0"></i><i class="i1"></i><i class="i2"></i><i class="i3"></i><i class="i4"></i><i class="i5"></i></div>');
+		this.elka.appendTo('body');
 
 		var $this = this;
 
@@ -110,11 +118,6 @@ $(function() {
 	}
 
 	var proto = Player.prototype;
-
-	proto.build = function() {
-		this.elka = $('<div class="elka elka-' + this.color + ' elka-normal"><i class="i0"></i><i class="i1"></i><i class="i2"></i><i class="i3"></i><i class="i4"></i><i class="i5"></i></div>');
-		this.elka.appendTo('body');
-	}
 
 	proto.key = function(e) {
 		switch(e.which) {
@@ -166,9 +169,65 @@ $(function() {
 			this.elka.css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') + '(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
 	}
 
-	$(window).on('resize', function() {
-		dimensions = [$(window).width(), $(window).height()];
-	}).trigger('resize');
-
 	players[0] = new Player();
+
+	var thingTypes = {
+		box: {
+			name: 'box',
+			style: function() {
+				return {
+					backgroundColor: '#' + parseInt(Math.random() * 800000 + 100000),
+					border: '1px solid #fff',
+					borderRadius: '64px',
+					height: '64px',
+					width: '64px'
+				};
+			},
+			width: 64,
+			height: 64
+		}
+	};
+
+	this.itemSpeed = 10;
+
+	var Thing = function(type, id) {
+		var $this = this;
+
+		this.id = id;
+		this.type = $.extend(true, {}, thingTypes[type]);
+		this.speed = Math.random() * (that.itemSpeed - 7) + 3;
+
+		if (typeof this.type.style == 'function') this.type.style = this.type.style();
+
+		this.pos = [dimensions[0], Math.random() * (dimensions[1] - this.type.height)];
+
+		this.item = $('<div class="thing thing-' + this.type.name + '">' + (this.type.content ? this.type.content : this.type.name) + '</div>');
+		this.item.css(this.type.style).css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') +
+			'(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
+		this.item.appendTo('body');
+
+		this.tickFn = that.tickFunctionAdd(function() { $this.itemTick() });
+	};
+
+	var proto = Thing.prototype;
+	proto.itemTick = function() {
+		this.pos[0] -= this.speed;
+
+		if (this.pos[0] < -this.type.width) {
+			that.tickFunctionRemove(this.tickFn);
+			this.item.remove();
+			delete things[this.id];
+
+			return false;
+		}
+
+		this.item.css(this.type.style).css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') +
+			'(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
+	}
+
+	var i = 0;
+	setInterval(function() {
+		things[i++] = new Thing('box', i - 1);
+		console.log(things);
+	}, 1000);
 });

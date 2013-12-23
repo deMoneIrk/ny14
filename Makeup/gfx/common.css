@@ -13,8 +13,8 @@ body {
 .bg div {
 	background-position: bottom;
 	background-repeat: no-repeat;
-	float: left;
 	display: block;
+	float: left;
 }
 
 .bg1 div { height: 251px }
@@ -32,6 +32,7 @@ body {
 .elka i {
 	display: block;
 	height: 106px;
+	left: 0px;
 	position: absolute;
 	top: 0px;
 }
@@ -83,3 +84,14 @@ body {
 .elka-frozen .i3 { background-position: -139px 0 }
 .elka-frozen .i4 { background-position: -182px 0 }
 .elka-frozen .i5 { background-position: -212px 0 }
+
+.thing {
+	color: #fff;
+	display: block;
+	font-size: 16px;
+	left: 0px;
+	position: absolute;
+	text-align: center;
+	top: 0px;
+	vertical-align: middle;
+}
