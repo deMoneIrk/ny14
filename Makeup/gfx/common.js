@@ -1,6 +1,12 @@
-$(function() {
+var Game = function() {
 	stop = false;
-	var path = 'gfx/', players = [], dimensions = [0, 0], things = [], that = this, canvas = document.getElementById('canvas'), ctx = canvas.getContext("2d");
+	var path = 'gfx/', 
+		players = [], 
+		dimensions = [0, 0], 
+		things = [], 
+		that = this, 
+		canvas = document.getElementById('canvas'), 
+		ctx = canvas.getContext("2d");
 
 	$(window).on('resize', function() {
 		dimensions = [$(window).width(), $(window).height()];
@@ -11,7 +17,7 @@ $(function() {
 
 	this.addThingMinTime = 1000;
 	this.bgSpeed = 5;
-	this.itemSpeed = 10;
+	this.itemSpeed = 1;
 	this.tickList = {};
 	this.tickFunctionAdd = function(i) { var k = 'i' + Math.random(); this.tickList[k] = i; return k; };
 	this.tickFunctionRemove = function(i) { delete this.tickList[i]; return true; };
@@ -21,7 +27,6 @@ $(function() {
 		for(var i in that.tickList) that.tickList[i]();
 	}; this.tickEvent();
 
-	// background manager
 	(function() {
 		var $this = this;
 
@@ -50,7 +55,7 @@ $(function() {
 		}
 
 		that.tickFunctionAdd(function() {
-			var multiply = [0, 0.9, 0.5, 0.2];
+			var multiply = [0, 1.2, 0.5, 0.2];
 
 			for (var i = 1; i < 4; i++) {
 				$this.bg[i][3] = $this.bg[i][3] - multiply[i] * that.bgSpeed;
@@ -161,7 +166,47 @@ $(function() {
 		int = setInterval(tremble, timeout);
 	}
 
-	var thingTypes = {
+	var mode = 'random';
+	thingTypes = {
+		ball1: {
+			role: 'good',
+			name: 'ball1',
+			content: function() { return Math.random() > 0.5 ? '<i class="ball"></i>' : '<i></i>'; },
+			style: {},
+			bang: function(gamer, thing) {
+				thing.destroy('#8e44ac');
+				gamer.score += 25;
+			},
+			width: 40,
+			height: 33
+		},
+
+		ball2: {
+			role: 'good',
+			name: 'ball2',
+			content: function() { return Math.random() > 0.5 ? '<i class="ball"></i>' : '<i></i>'; },
+			style: {},
+			bang: function(gamer, thing) {
+				thing.destroy('#bd3d24');
+				gamer.score += 50;
+			},
+			width: 40,
+			height: 33
+		},
+
+		ball3: {
+			role: 'good',
+			name: 'ball3',
+			content: function() { return Math.random() > 0.5 ? '<i class="ball"></i>' : '<i></i>'; },
+			style: {},
+			bang: function(gamer, thing) {
+				thing.destroy('#27ad5f');
+				gamer.score += 100;
+			},
+			width: 40,
+			height: 33
+		},
+
 		bgremlin: {
 			role: 'bad',
 			name: 'bgremlin',
@@ -179,6 +224,38 @@ $(function() {
 			},
 			width: 92,
 			height: 59
+		},
+
+		deer: {
+			role: 'good',
+			name: 'deer',
+			content: '<i></i>',
+			deerTimeout: false,
+			style: {},
+			bang: function(gamer, thing) {
+				thing.destroy('#e27c3d');
+
+				if (that.bgSpeed < 30) {
+					that.bgSpeed += 5;
+					that.itemSpeed++;
+				}
+
+				if (thingTypes.deer.deerTimeout) clearTimeout(thingTypes.deer.deerTimeout);
+
+				thingTypes.deer.deerTimeout = setTimeout(function() {
+					var int = setInterval(function() {
+						if (that.bgSpeed > 5) {
+							that.bgSpeed--;
+							that.itemSpeed -= 0.2;
+						} else {
+							thingTypes.deer.deerTimeout = false;
+							clearInterval(int);
+						}
+					}, 100);
+				}, 10000);
+			},
+			width: 57,
+			height: 80
 		},
 
 		fireball: {
@@ -261,7 +338,7 @@ $(function() {
 				gamer.speed = [0, 0];
 				gamer.moving = [0, 0];
 				gamer.max = [1, 1];
-				gamer.moveValue = 0.05;
+				gamer.moveValue /= 6;
 				gamer.elka.addClass('elka-frozen');
 
 				if (gamer.thingSf) clearTimeout(gamer.thingSf);
@@ -273,7 +350,7 @@ $(function() {
 						gamer.elka.addClass('elka-frozen');
 					}, function() {
 						gamer.elka.removeClass('elka-frozen');
-						gamer.moveValue = 0.3;
+						gamer.moveValue *= 6;
 						gamer.max = [6, 6];
 					});
 
@@ -308,9 +385,10 @@ $(function() {
 
 		this.id = id;
 		this.type = $.extend(true, {}, thingTypes[type]);
-		this.speed = Math.random() * (that.itemSpeed - 7) + 3;
+		this.speed = Math.random() * 3 + 3;
 
 		if (this.type.style && typeof this.type.style == 'function') this.type.style = this.type.style();
+		if (this.type.content && typeof this.type.content == 'function') this.type.content = this.type.content();
 
 		this.pos = [dimensions[0], Math.random() * (dimensions[1] - this.type.height)];
 
@@ -328,7 +406,7 @@ $(function() {
 
 	var proto = Thing.prototype;
 	proto.itemTick = function() {
-		this.pos[0] -= this.speed;
+		this.pos[0] -= this.speed * that.itemSpeed;
 
 		if (this.pos[0] < -this.type.width) {
 			this.destroy();
@@ -358,7 +436,7 @@ $(function() {
 			addThingTime = now;
 
 			var id = 'i' + Math.random();
-			things[id] = new Thing('ggremlin', id);
+			things[id] = new Thing(mode == 'random' ? Object.keys(thingTypes)[Math.floor(Math.random() * Object.keys(thingTypes).length)] : mode, id);
 		}
 	};
 	this.tickFunctionAdd(addThing);
@@ -411,7 +489,7 @@ $(function() {
 	this.tickFunctionAdd(function() {
 		update(1000 / 60, ctx);
 	});
-});
+};
 
 /***** requestAnimationFrame polyfill *****/
 // Source: http://html5.by/blog/what-is-requestanimationframe/
@@ -736,3 +814,8 @@ function update (frameDelay, context2D) {
 		particle.draw(context2D);
 	}
 }
+
+$(function() {
+	var game = new Game();
+	console.log(game);
+});
