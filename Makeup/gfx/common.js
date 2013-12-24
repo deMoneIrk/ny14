@@ -147,7 +147,7 @@ var Game = function() {
 			this.speed[1] = 0;
 		}
 
-		if (prevPos[0] != this.pos[0] || prevPos[1] != this.pos[1])
+		if (prevPos[0] != this.pos[0] || prevPos[1] != this.pos[1] || this.thingFb)
 			this.elka.css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') + '(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
 	}
 
