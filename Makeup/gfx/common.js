@@ -1,31 +1,3 @@
-/**
- * Взрывы: http://www.gameplaypassion.com/blog/explosion-effect-html5-canvas/
- * */
-(function() {
-    var lastTime = 0;
-    var vendors = ['ms', 'moz', 'webkit', 'o'];
-    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
-                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
-    }
-
-    if (!window.requestAnimationFrame)
-        window.requestAnimationFrame = function(callback, element) {
-            var currTime = new Date().getTime();
-            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
-              timeToCall);
-            lastTime = currTime + timeToCall;
-            return id;
-        };
-
-    if (!window.cancelAnimationFrame)
-        window.cancelAnimationFrame = function(id) {
-            clearTimeout(id);
-        };
-}());
-
 $(function() {
 	stop = false;
 	var path = 'gfx/', players = [], dimensions = [0, 0], things = [], that = this, canvas = document.getElementById('canvas'), ctx = canvas.getContext("2d");
@@ -119,7 +91,7 @@ $(function() {
 		var $this = this;
 
 		$(document).on('keydown keyup', function(e) { $this.key(e) });
-		that.tickFunctionAdd(function() { $this.tick() });
+		that.tickFunctionAdd(function() { $this.playerTick() });
 	}
 
 	var proto = Player.prototype;
@@ -133,7 +105,7 @@ $(function() {
 		}
 	}
 
-	proto.tick = function() {
+	proto.playerTick = function() {
 		var prevPos = [this.pos[0], this.pos[1]];
 
 		// Устанавливаем текущую скорость
@@ -176,23 +148,158 @@ $(function() {
 
 	players[0] = new Player();
 
+	function trembling(times, timeout, odd, even, callback) {
+		var count = 0, int;
+		function tremble() {
+			count++; if (count > times) {
+				clearInterval(int);
+				callback && callback();
+				return;
+			}
+			(count % 2) ? odd && odd() : even && even();
+		}
+		int = setInterval(tremble, timeout);
+	}
+
 	var thingTypes = {
-		box: {
-			name: 'box',
-			style: function() {
-				return {
-					backgroundColor: '#' + parseInt(Math.random() * 800000 + 100000),
-					border: '1px solid #fff',
-					borderRadius: '64px',
-					height: '64px',
-					width: '64px'
-				};
+		bgremlin: {
+			role: 'bad',
+			name: 'bgremlin',
+			content: '<i></i>',
+			style: {},
+			bang: function(gamer, thing) {
+				thing.destroy('#6fdefb');
+
+				for (var i in things) {
+					var id = 'i' + Math.random();
+					things[id] = new Thing('snowflake', id); things[id].pos = [things[i].pos[0], things[i].pos[1]];
+
+					things[i].destroy('#6fdefb');
+				}
 			},
-			bang: function(gamer, that) {
-				that.destroy();
+			width: 92,
+			height: 59
+		},
+
+		fireball: {
+			role: 'bad',
+			name: 'fireball',
+			content: '<i></i>',
+			style: {},
+			bang: function(gamer, thing) {
+				thing.destroy('#fdd857');
+
+				gamer.score -= 50;
+				if (!gamer.thingFb) {
+					gamer.speed = [0, 0];
+					gamer.moving = [0, 0];
+					gamer.moveValue = -gamer.moveValue;
+
+					gamer.thingFb = true;
+
+					trembling(100, 100, function() {
+						gamer.elka.removeClass('elka-frozen');
+						gamer.pos[0] += Math.random() * 3 - 6;
+						gamer.pos[1] += Math.random() * 3 - 6;
+					}, function() {
+						gamer.elka.addClass('elka-frozen');
+						gamer.pos[0] += Math.random() * 3 - 6;
+						gamer.pos[1] += Math.random() * 3 - 6;
+					}, function() {
+						gamer.elka.removeClass('elka-frozen');
+						gamer.moveValue = -gamer.moveValue;
+						gamer.thingFb = false;
+					});
+				}
 			},
-			width: 64,
-			height: 64
+			width: 76,
+			height: 76
+		},
+
+		ggremlin: {
+			role: 'bad',
+			name: 'ggremlin',
+			content: '<i></i>',
+			style: {},
+			thingGG: false,
+			bang: function(gamer, thing) {
+				thing.destroy('#2dcc70');
+
+				if (!thingTypes.ggremlin.thingGG)
+					for (var i in players)
+						players[i].elka.removeClass('elka-' + players[i].color).addClass('elka-green');
+
+				if (thingTypes.ggremlin.thingGG) clearTimeout(thingTypes.ggremlin.thingGG);
+
+				thingTypes.ggremlin.thingGG = setTimeout(function() {
+					trembling(6, 100, function() {
+						for (var i in players)
+							players[i].elka.removeClass('elka-green').addClass('elka-' + players[i].color);
+					}, function() {
+						for (var i in players)
+							players[i].elka.removeClass('elka-' + players[i].color).addClass('elka-green');
+					}, function() {
+						for (var i in players)
+							players[i].elka.removeClass('elka-green').addClass('elka-' + players[i].color);
+						thingTypes.ggremlin.thingGG = false;
+					})
+				}, 10000);
+			},
+			width: 92,
+			height: 59
+		},
+
+		snowflake: {
+			role: 'bad',
+			name: 'snowflake',
+			content: '<i></i>',
+			style: {},
+			bang: function(gamer, thing) {
+				thing.destroy('#ffffff');
+
+				gamer.score -= 10;
+				gamer.speed = [0, 0];
+				gamer.moving = [0, 0];
+				gamer.max = [1, 1];
+				gamer.moveValue = 0.05;
+				gamer.elka.addClass('elka-frozen');
+
+				if (gamer.thingSf) clearTimeout(gamer.thingSf);
+
+				gamer.thingSf = setTimeout(function() {
+					trembling(5, 100, function() {
+						gamer.elka.removeClass('elka-frozen');
+					}, function() {
+						gamer.elka.addClass('elka-frozen');
+					}, function() {
+						gamer.elka.removeClass('elka-frozen');
+						gamer.moveValue = 0.3;
+						gamer.max = [6, 6];
+					});
+
+				}, 10000);
+			},
+			width: 62,
+			height: 57
+		},
+
+		ygremlin: {
+			role: 'bad',
+			name: 'ygremlin',
+			content: '<i></i>',
+			style: {},
+			bang: function(gamer, thing) {
+				thing.destroy('#fdc501');
+
+				for (var i in things) {
+					var id = 'i' + Math.random();
+					things[id] = new Thing('fireball', id); things[id].pos = [things[i].pos[0], things[i].pos[1]];
+
+					things[i].destroy('#fdc501');
+				}
+			},
+			width: 92,
+			height: 59
 		}
 	};
 
@@ -203,14 +310,18 @@ $(function() {
 		this.type = $.extend(true, {}, thingTypes[type]);
 		this.speed = Math.random() * (that.itemSpeed - 7) + 3;
 
-		if (typeof this.type.style == 'function') this.type.style = this.type.style();
+		if (this.type.style && typeof this.type.style == 'function') this.type.style = this.type.style();
 
 		this.pos = [dimensions[0], Math.random() * (dimensions[1] - this.type.height)];
 
-		this.item = $('<div class="thing thing-' + this.type.name + '">' + (this.type.content ? this.type.content : this.type.name) + '</div>');
-		this.item.css(this.type.style).css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') +
+		this.item = $('<div class="thing thing-' + this.type.name + '">' + (this.type.content || '') + '</div>');
+		this.item.css(this.type.style);
+
+		this.item.css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') +
 			'(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
 		this.item.appendTo('body');
+
+		if (typeof this.type.create == 'function') this.type.create();
 
 		this.tickFn = that.tickFunctionAdd(function() { $this.itemTick() });
 	};
@@ -228,7 +339,9 @@ $(function() {
 			'(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
 	};
 
-	proto.destroy = function() {
+	proto.destroy = function(createBoom) {
+		createBoom && createExplosion(this.pos[0], this.pos[1] + this.type.height / 2, createBoom);
+
 		that.tickFunctionRemove(this.tickFn);
 		this.item.remove();
 		delete things[this.id];
@@ -245,7 +358,7 @@ $(function() {
 			addThingTime = now;
 
 			var id = 'i' + Math.random();
-			things[id] = new Thing('box', id);
+			things[id] = new Thing('ggremlin', id);
 		}
 	};
 	this.tickFunctionAdd(addThing);
@@ -293,20 +406,47 @@ $(function() {
 	};
 
 	this.tickFunctionAdd(testIntersection);
+
+	// Explosions
+	this.tickFunctionAdd(function() {
+		update(1000 / 60, ctx);
+	});
 });
 
-/*
- *  This is the Point constructor. Polygon uses this object, but it is
- *  just a really simple set of x and y coordinates.
- */
+/***** requestAnimationFrame polyfill *****/
+// Source: http://html5.by/blog/what-is-requestanimationframe/
+(function() {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
+                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
+    }
+
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}());
+
+/***** Polygons intersection *****/
+// Source: http://www.amphibian.com/blogstuff/polygon.js
 function Point(px, py) {
 	this.x = px;
 	this.y = py;
 }
 
-/*
- *  This is the Polygon constructor. All points are center-relative.
- */
 function Polygon(c, clr) {
 	this.points = new Array();
 	this.center = c;
@@ -314,16 +454,10 @@ function Polygon(c, clr) {
 
 }
 
-/*
- *  Point x and y values should be relative to the center.
- */
 Polygon.prototype.addPoint = function (p) {
 	this.points.push({x:p[0], y:p[1]});
 }
 
-/*
- *  Point x and y values should be absolute coordinates.
- */
 Polygon.prototype.addAbsolutePoint = function (p) {
 	this.points.push({
 		"x": p[0] - this.center.x,
@@ -331,33 +465,20 @@ Polygon.prototype.addAbsolutePoint = function (p) {
 	});
 }
 
-/*
- * Returns the number of sides. Equal to the number of vertices.
- */
 Polygon.prototype.getNumberOfSides = function () {
 	return this.points.length;
 }
 
-/*
- * rotate the polygon by a number of radians
- */
 Polygon.prototype.rotate = function (rads) {
-
 	for (var i = 0; i < this.points.length; i++) {
 		var x = this.points[i].x;
 		var y = this.points[i].y;
 		this.points[i].x = Math.cos(rads) * x - Math.sin(rads) * y;
 		this.points[i].y = Math.sin(rads) * x + Math.cos(rads) * y;
 	}
-
 }
 
-/*
- *  The draw function takes as a parameter a Context object from
- *  a Canvas element and draws the polygon on it.
- */
 Polygon.prototype.draw = function (ctx) {
-
 	ctx.save();
 
 	ctx.fillStyle = this.color;
@@ -370,15 +491,9 @@ Polygon.prototype.draw = function (ctx) {
 	ctx.fill();
 
 	ctx.restore();
-
 }
 
-/*
- *  This function returns true if the given point is inside the polygon,
- *  and false otherwise.
- */
 Polygon.prototype.containsPoint = function (pnt) {
-
 	var nvert = this.points.length;
 	var testx = pnt.x;
 	var testy = pnt.y;
@@ -401,18 +516,9 @@ Polygon.prototype.containsPoint = function (pnt) {
 			c = !c;
 	}
 	return c;
-
 }
 
-/*
- *  To detect intersection with another Polygon object, this
- *  function uses the Separating Axis Theorem. It returns false
- *  if there is no intersection, or an object if there is. The object
- *  contains 2 fields, overlap and axis. Moving the polygon by overlap
- *  on axis will get the polygons out of intersection.
- */
 Polygon.prototype.intersectsWith = function (other) {
-
 	var axis = new Point();
 	var tmp, minA, maxA, minB, maxB;
 	var side, i;
@@ -541,4 +647,92 @@ Polygon.prototype.intersectsWith = function (other) {
 		"overlap": overlap + 0.001,
 		"axis": smallest
 	};
+}
+
+/***** Explosion Effect *****/
+// Source: http://www.gameplaypassion.com/blog/explosion-effect-html5-canvas/
+var particles = [];
+
+function randomFloat (min, max) { return min + Math.random()*(max-min); }
+
+function Particle () {
+	this.scale = 1.0;
+	this.x = 0;
+	this.y = 0;
+	this.radius = 20;
+	this.color = "#000";
+	this.velocityX = 0;
+	this.velocityY = 0;
+	this.scaleSpeed = 0.5;
+
+	this.update = function(ms) {
+		// shrinking
+		this.scale -= this.scaleSpeed * ms / 1000.0;
+
+		if (this.scale <= 0) {
+			this.scale = 0;
+		}
+
+		// moving away from explosion center
+		this.x += this.velocityX * ms/1000.0;
+		this.y += this.velocityY * ms/1000.0;
+	};
+
+	this.draw = function(context2D) {
+		// translating the 2D context to the particle coordinates
+		context2D.save();
+		context2D.translate(this.x, this.y);
+		context2D.scale(this.scale, this.scale);
+
+		// drawing a filled circle in the particle's local space
+		context2D.beginPath();
+		context2D.arc(0, 0, this.radius, 0, Math.PI*2, true);
+		context2D.closePath();
+
+		context2D.fillStyle = this.color;
+		context2D.fill();
+
+		context2D.restore();
+	};
+}
+
+function createExplosion(x, y, color) {
+	var minSize = 10;
+	var maxSize = 30;
+	var count = 10;
+	var minSpeed = 60.0;
+	var maxSpeed = 200.0;
+	var minScaleSpeed = 1.0;
+	var maxScaleSpeed = 4.0;
+
+	for (var angle=0; angle<360; angle += Math.round(360/count)) {
+		var particle = new Particle();
+
+		particle.x = x;
+		particle.y = y;
+
+		particle.radius = randomFloat(minSize, maxSize);
+
+		particle.color = color;
+
+		particle.scaleSpeed = randomFloat(minScaleSpeed, maxScaleSpeed);
+
+		var speed = randomFloat(minSpeed, maxSpeed);
+
+		particle.velocityX = speed * Math.cos(angle * Math.PI / 180.0);
+		particle.velocityY = speed * Math.sin(angle * Math.PI / 180.0);
+
+		particles.push(particle);
+	}
+}
+
+function update (frameDelay, context2D) {
+	context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
+
+	for (var i=0; i<particles.length; i++) {
+		var particle = particles[i];
+
+		particle.update(frameDelay);
+		particle.draw(context2D);
+	}
 }
