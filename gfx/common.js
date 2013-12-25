@@ -1,7 +1,7 @@
-var Game = function() {
+var Game = function(gameID) {
 	stop = false;
 
-	var path = 'gfx/', 
+	var path = '/gfx/', 
 		players = [], 
 		dimensions = [0, 0], 
 		things = [], 
@@ -25,7 +25,7 @@ var Game = function() {
 	this.tickEvent = function() {
 		if (!stop) requestAnimationFrame(arguments.callee);
 		for(var i in that.tickList) that.tickList[i]();
-	}; this.tickEvent();
+	};
 
 	(function() {
 		var $this = this;
@@ -251,8 +251,6 @@ var Game = function() {
 		if (prevPos[0] != this.pos[0] || prevPos[1] != this.pos[1] || this.thingFb)
 			this.elka.css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') + '(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
 	};
-
-	players[0] = new Player();
 
 	function trembling(times, timeout, odd, even, callback) {
 		var count = 0, int;
@@ -608,7 +606,6 @@ var Game = function() {
 			things[id] = new Thing(mode == 'random' ? getThingName({good:true, bad:true}) : mode, id);
 		}
 	};
-	this.tickFunctionAdd(addThing);
 
 	var testIntersection = function() {
 		var plGamers = [], plItems = [];
@@ -647,13 +644,24 @@ var Game = function() {
 		}
 	};
 
-	this.tickFunctionAdd(testIntersection);
+	this.players = players;
 
-	// Canvas print
-	this.tickFunctionAdd(function() {
-		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-		update(1000 / 60, ctx);
-	});
+	this.startGame = function() {
+		this.tickEvent();
+		players[0] = new Player('yellow');
+		this.tickFunctionAdd(addThing);
+		this.tickFunctionAdd(testIntersection);
+
+		// Canvas print
+		this.tickFunctionAdd(function() {
+			ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+			update(1000 / 60, ctx);
+		});
+	};
+
+	this.newPlayer = function(id, color) {
+		players[id] = new Player(color);
+	}
 };
 
 /***** requestAnimationFrame polyfill *****/
@@ -981,5 +989,122 @@ function update (frameDelay, context2D) {
 }
 
 $(function() {
+	var socket = io.connect('http://2014.studio38.ru:8089'), gameID;
 	var game = new Game();
+
+	socket.emit('newGame');
+	socket.on('id', function(data) {
+		gameID = data.id;
+
+		$('.second_screen_code').text(gameID);
+
+		socket.on('system', function(data) {
+			switch(data.status) {
+				case 'new player':
+					$('.players_ico').append('<li id="av_' + data.playerID + '" class="' + data.color + ' authorization no_ava"></li>');
+					game.addPlayer(data.playerID, data.color);
+					break;
+			}
+		});
+	});
+
+	// intro animation
+	var indexArr = [5, 5, 5, 5];
+ 	function elkaAnimate(index) {
+		$('.front_elka_'+(index + 1)).find('div').eq(indexArr[index]).addClass('elka_animate');
+		indexArr[index] = indexArr[index] - 1;
+		if (indexArr[index] >= 0) {
+			setTimeout(function() {
+				elkaAnimate(index);
+			}, 70);	
+		} else {
+			setTimeout(function() {
+				$('.front_elka_'+(index + 1)).find('div').removeClass('elka_animate');
+				indexArr[index] = 5;
+			}, 1000);
+		}	
+	}
+
+	var introAnimateIndex = [1, 3, 2, 4],
+		atroI = 0, 
+		step2Count = 0;
+
+	function introAnimate() {
+		$('.intro_elka_'+introAnimateIndex[atroI]).addClass('color');
+		atroI++;
+		if (atroI < 4) {
+			setTimeout(introAnimate, 800);
+		} else {
+			setTimeout(introAnimateStep2, 1000);
+		}
+	}
+
+	function introAnimateStep2() {
+		$('.intro_elka.color').eq(step2Count).addClass('go_up');
+		step2Count++;
+		if (step2Count < $('.intro_elka.color').length) {
+			setTimeout(introAnimateStep2, 200);	
+		} else {
+			// alert('Сюда хуярь старт игры!');
+			$('.first_screen').hide();
+
+			$('#game').show();
+			game.startGame();
+		}
+	}
+
+	var animeteIndex = 0,
+		elkaAnimated = true; 
+	function startAnimate() {
+		elkaAnimate(animeteIndex);
+		animeteIndex++;
+		if (animeteIndex <= 3) {
+			setTimeout(startAnimate, 800);
+		} else {
+			animeteIndex = 0;
+			if(elkaAnimated)
+				setTimeout(startAnimate, 5000);
+		}	
+	}
+	startAnimate();
+
+	// snow
+	/*
+	window.rnd = function(from, to) { return Math.ceil(Math.random() * to + from); };
+	var cn = 0;
+    var ci = setInterval(function() {
+        var cnt = Math.ceil(Math.random() * 10);
+        for (var i = 0; i < cnt; i++) {
+            cn = cn + 1;
+            var l = Math.ceil(rnd(0, $(window).width())),
+				t = Math.ceil(rnd(0, $(window).height() / 6) - 100);
+            $('.front_elka_wrap').append('<i id="cn' + cn + '" class="snow" style="top: '+ t +'px; left: ' + l + 'px"></i>');
+            var thisSnow = $('#cn' + cn);
+            $(thisSnow).animate({
+                left: l + parseInt((Math.random() - 0.5) * 6) * 32,
+                top: ($(window).height() - 20)
+            }, 5000, 'linear', function() {
+                $(this).addClass('notransition').animate({
+                    opacity: 0
+                }, function() {
+                    $(this).remove();
+                });
+                
+            }).addClass('fade');
+        }
+    }, 500);
+	*/
+
+    $('.first_btn').click(function() {
+    	elkaAnimated = false;
+    	$('.front_elka_wrap_inner').fadeOut(800);
+    	$('.first_screen_center').fadeOut(800, function() {
+    		$('.animate_wrap').fadeIn();
+    	});
+    });
+    
+    $('.start_btn').click(function() {
+    	$('.animate_wrap').addClass('startanimate');
+		setTimeout(introAnimate, 2500);	
+    });
 });

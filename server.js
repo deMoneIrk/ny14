@@ -31,6 +31,10 @@ io.set('origins', '2014.studio38.ru:*');
 var games = {}, players = {};
 
 io.sockets.on('connection', function (socket) {
+	socket.on('iphone', function(data) {
+		console.log(data);
+	});
+
 	socket.on('newGame', function() {
 		var gameID;
 		do {
@@ -102,7 +106,7 @@ io.sockets.on('connection', function (socket) {
 
 		players[data.playerID].gameID = data.gameID;
 		socket.emit('system', { status: 'joined game', gameID: data.gameID, color: color });
-		games[data.gameID].socket.emit('system', { player: games[data.gameID].players[data.playerID] });
+		games[data.gameID].socket.emit('system', { status: 'new player', playerID: data.playerID, color: color });
 	});
 });
 

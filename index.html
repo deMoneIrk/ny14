@@ -1,31 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="gfx/normalize.css" />
-	<link rel="stylesheet" type="text/css" href="gfx/common.css" />
+	<link href="/promo/css/style.css" rel="stylesheet"/>
+	<link rel="stylesheet" type="text/css" href="/gfx/common.css" />
 
-<!--
-	<script src="http://2014.studio38.ru:8088/socket.io/socket.io.js"></script>
-	<script>
-		var socket = io.connect('http://2014.studio38.ru:8088');
-		socket.on('game_id', function (data) {
-			console.log(data);
-			socket.emit('my other event', { my: 'data' });
-		});
-	</script>
--->
+	<script src="http://2014.studio38.ru:8089/socket.io/socket.io.js"></script>
 
-	<script type="text/javascript" src="gfx/jquery2.js"></script>
-	<script type="text/javascript" src="gfx/modernizr.js"></script>
-	<script type="text/javascript" src="gfx/common.js"></script>
+	<script type="text/javascript" src="/gfx/jquery2.js"></script>
+	<script type="text/javascript" src="/gfx/modernizr.js"></script>
+	<script type="text/javascript" src="/gfx/common.js"></script>
 
 	<meta charset="UTF-8" />
 
-	<title>2014</title>
+	<title>Flying X-Mas Trees</title>
 	<!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 </head>
 <body>
-	<div id="game">
+	<div class="first_screen">
+		<div class="first_screen_center">
+			<img class="first_screen_bg" src="/promo/img/first_screen.png" />
+			<div class="first_screen_moon"></div>
+			<a class="play_btn first_btn"></a>
+		</div>
+		<div class="animate_wrap" style="display: none;">
+			<div class="second_screen_center"  >
+				<div class="second_screen_block">
+					<img src="/promo/img/second_screen.jpg" />
+					<div class="second_screen_code ssc_1"></div>
+					<div class="second_screen_code ssc_2"></div>
+					
+					<div class="second_screen_block_right">
+						<ul class="players_ico"></ul>
+						<a class="start_btn"></a>
+					</div>
+				</div>
+				
+			</div>
+			
+			<div class="intro_block">
+				<div class="intro_elka_1 intro_elka"></div>
+				<div class="intro_elka_2 intro_elka"></div>
+				<div class="intro_elka_3 intro_elka"></div>
+				<div class="intro_elka_4 intro_elka"></div>
+				<div class="first_screen_moon"></div>
+			</div>
+		</div>
+		
+		<div class="front_elka_wrap">
+			<div class="front_elka_wrap_inner">
+				<div class="front_elka front_elka_1">
+					<div class="front_elka_1_1"></div>
+					<div class="front_elka_1_2"></div>
+					<div class="front_elka_1_3"></div>
+					<div class="front_elka_1_4"></div>
+					<div class="front_elka_1_5"></div>
+					<div class="front_elka_1_6"></div>
+				</div>
+				
+				<div class="front_elka front_elka_2">
+					<div class="front_elka_2_1"></div>
+					<div class="front_elka_2_2"></div>
+					<div class="front_elka_2_3"></div>
+					<div class="front_elka_2_4"></div>
+					<div class="front_elka_2_5"></div>
+					<div class="front_elka_2_6"></div>
+				</div>
+				
+				<div class="front_elka front_elka_3">
+					<div class="front_elka_3_1"></div>
+					<div class="front_elka_3_2"></div>
+					<div class="front_elka_3_3"></div>
+					<div class="front_elka_3_4"></div>
+					<div class="front_elka_3_5"></div>
+					<div class="front_elka_3_6"></div>
+				</div>
+				
+				<div class="front_elka front_elka_4">
+					<div class="front_elka_4_1"></div>
+					<div class="front_elka_4_2"></div>
+					<div class="front_elka_4_3"></div>
+					<div class="front_elka_4_4"></div>
+					<div class="front_elka_4_5"></div>
+					<div class="front_elka_4_6"></div>
+				</div>
+			</div>
+		</div>	
+	</div>
+
+	<div id="game" style="display:none">
 		<div class="bg bg3"></div>
 		<div class="bg bg2"></div>
 		<div class="bg bg1"></div>
