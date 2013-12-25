@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<title>Mobile version</title>
+	
+	<meta name="viewport" content="initial-scale=0.5, maximum-scale=1, user-scalable=no"/>
+
+	<meta name="keywords" content="" />
+	<meta name="description" content="" />
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<link href="media/css/style.css" rel="stylesheet"/>
+</head>
+
+<body class="horizontal">
+<script>
+$(function(){
+	if(window.orientation == -90 || window.orientation == 90 || window.orientation == undefined){
+		/*$('meta[name=viewport]').attr('content','initial-scale=0.75, maximum-scale=1, user-scalable=no');*/
+		$('body').addClass('horizontal');
+	}else {
+		/*$('meta[name=viewport]').attr('content','initial-scale=0.5, maximum-scale=1, user-scalable=no');*/
+		$('body').removeClass('horizontal');
+	}
+	window.addEventListener("orientationchange", function() {
+		if(window.orientation == -90 || window.orientation == 90 || window.orientation == undefined){
+			/*$('meta[name=viewport]').attr('content','initial-scale=0.75, maximum-scale=1, user-scalable=no');*/
+			$('body').addClass('horizontal');
+		}else {
+			/*$('meta[name=viewport]').attr('content','initial-scale=0.5, maximum-scale=1, user-scalable=no');*/
+			$('body').removeClass('horizontal');
+		}
+	}, false);	
+	
+	$('.play_inkognito_btn').click(function(){
+		$('body').addClass('fade_second_screen');	
+	});
+	$('.join_btn').click(function(){
+		$('.game_pad').fadeIn();	
+	});
+});
+	
+</script>
+<div class="wrapper">
+	<div class="rotate_device">
+		
+	</div>
+	<div class="first_screen" >
+		<img src="media/img/mobile_first_screen.png" class="mobile_first_screen" />
+		
+		<a class="fb_btn"></a>
+		<a class="play_inkognito_btn"></a>
+		
+		<img src="media/img/created_img.png" class="created_img" />
+	</div>
+	<div class="second_screen">
+		<img src="media/img/second_txt.png" class="second_txt" />
+		<input type="text" pattern="[0-9]*" />
+		<div class="second_screen_join_block">
+			<div class="players_ico authorization green no_ava"></div>
+			<a class="join_btn"></a>
+		</div>
+	</div>
+	<div class="game_pad green" style="display: none;">
+		<div class="stick"><i></i></div>
+		<div class="strike"></div>
+	</div>
+</div><!-- .wrapper -->
+
+</body>
+</html>
