@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<title>Flying X-Mas Trees</title>
+	
+	<meta name="viewport" content="initial-scale=0.5, maximum-scale=1, user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+	<script src="http://2014.studio38.ru:8089/socket.io/socket.io.js"></script>
+
+	<script type="text/javascript" src="/gfx/jquery2.js"></script>
+	<script type="text/javascript" src="/gfx/common-mobile.js"></script>
+
+	<link href="/media/css/style.css" rel="stylesheet"/>
+</head>
+
+<body class="horizontal">
+	<div class="wrapper">
+		<div class="rotate_device"></div>
+		<div class="first_screen" >
+			<img src="/media/img/mobile_first_screen.png" class="mobile_first_screen" />
+			
+			<a class="fb_btn"></a>
+			<a class="play_inkognito_btn"></a>
+			
+			<img src="/media/img/created_img.png" class="created_img" />
+		</div>
+		<div class="second_screen">
+			<img src="/media/img/second_txt.png" class="second_txt" />
+			<input type="text" pattern="[0-9]*" id="gameID" />
+			<div class="second_screen_join_block">
+				<div class="players_ico authorization green no_ava"></div>
+				<a class="join_btn"></a>
+			</div>
+		</div>
+		<div class="game_pad" style="display: none;">
+			<div class="stick"><i></i></div>
+			<div class="strike"></div>
+		</div>
+	</div>
+</body>
+</html>
