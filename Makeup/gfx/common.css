@@ -3,6 +3,12 @@ body {
 	overflow: hidden;
 }
 
+#game {
+	height: 100%;
+	overflow: hidden;
+	width: 100%;
+}
+
 .bg {
 	bottom: 0px;
 	display: block;
@@ -83,6 +89,42 @@ canvas {
 	background-position: -212px -106px;
 	left: 122px;
 	width: 28px;
+}
+
+.shot {
+	background-color: #fdc501;
+	border-radius: 50px;
+	display: block;
+	height: 28px;
+	position: absolute;
+}
+
+.star {
+	background-image: url(items.png);
+	background-position: -320px -447px;
+	color: #967500;
+	display: none;
+	font-size: 21px;
+	height: 44px;
+	width: 68px;
+	text-align: center;
+	padding-top: 24px;
+	position: absolute;
+	-webkit-transform: scale(0.75);
+	-moz-transform: scale(0.75);
+	-ms-transform: scale(0.75);
+	-o-transform: scale(0.75);
+	transform: scale(0.75);
+	z-index: 150;
+}
+
+.elka .star {
+	left: 122px;
+	top: 20px;
+}
+
+.elka-star .star {
+	display: block;
 }
 
 .elka-frozen .i0 { background-position: 0 0 }
@@ -286,6 +328,155 @@ canvas {
 		-ms-transform: rotate(359deg) scale(1);
 		-o-transform: rotate(359deg) scale(1);
 		transform: rotate(359deg) scale(1);
+	}
+}
+
+@-webkit-keyframes santa {
+	0% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	25% {
+		-webkit-transform: rotate(30deg);
+		-moz-transform: rotate(30deg);
+		-ms-transform: rotate(30deg);
+		-o-transform: rotate(30deg);
+		transform: rotate(30deg);
+	}
+	50% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	75% {
+		-webkit-transform: rotate(-30deg);
+		-moz-transform: rotate(-30deg);
+		-ms-transform: rotate(-30deg);
+		-o-transform: rotate(-30deg);
+		transform: rotate(-30deg);
+	}
+	100% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+}
+@-moz-keyframes santa {
+	0% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	25% {
+		-webkit-transform: rotate(30deg);
+		-moz-transform: rotate(30deg);
+		-ms-transform: rotate(30deg);
+		-o-transform: rotate(30deg);
+		transform: rotate(30deg);
+	}
+	50% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	75% {
+		-webkit-transform: rotate(-30deg);
+		-moz-transform: rotate(-30deg);
+		-ms-transform: rotate(-30deg);
+		-o-transform: rotate(-30deg);
+		transform: rotate(-30deg);
+	}
+	100% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+}
+@-o-keyframes santa {
+	0% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	25% {
+		-webkit-transform: rotate(30deg);
+		-moz-transform: rotate(30deg);
+		-ms-transform: rotate(30deg);
+		-o-transform: rotate(30deg);
+		transform: rotate(30deg);
+	}
+	50% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	75% {
+		-webkit-transform: rotate(-30deg);
+		-moz-transform: rotate(-30deg);
+		-ms-transform: rotate(-30deg);
+		-o-transform: rotate(-30deg);
+		transform: rotate(-30deg);
+	}
+	100% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+}
+@keyframes santa {
+	0% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	25% {
+		-webkit-transform: rotate(30deg);
+		-moz-transform: rotate(30deg);
+		-ms-transform: rotate(30deg);
+		-o-transform: rotate(30deg);
+		transform: rotate(30deg);
+	}
+	50% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	75% {
+		-webkit-transform: rotate(-30deg);
+		-moz-transform: rotate(-30deg);
+		-ms-transform: rotate(-30deg);
+		-o-transform: rotate(-30deg);
+		transform: rotate(-30deg);
+	}
+	100% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
 	}
 }
 
@@ -599,6 +790,58 @@ canvas {
 	animation: gremlin 3s infinite linear;
 }
 
+.thing-box {
+	height: 85px;
+	width: 74px;
+}
+
+.thing-box i {
+	background-image: url(items.png);
+	background-position: -11px -14px;
+	height: 85px;
+	width: 74px;
+	display: block;
+}
+
+.thing-candy {
+	height: 53px;
+	width: 62px;
+}
+
+.thing-candy i {
+	background-image: url(items.png);
+	background-position: -291px -15px;
+	height: 53px;
+	width: 62px;
+	display: block;
+}
+
+.thing-candycane {
+	height: 52px;
+	width: 42px;
+}
+
+.thing-candycane i {
+	background-image: url(items.png);
+	background-position: -457px -14px;
+	height: 52px;
+	width: 42px;
+	display: block;
+}
+
+.thing-cookie {
+	height: 52px;
+	width: 42px;
+}
+
+.thing-cookie i {
+	background-image: url(items.png);
+	background-position: -380px -15px;
+	height: 52px;
+	width: 42px;
+	display: block;
+}
+
 .thing-deer {
 	height: 80px;
 	width: 57px;
@@ -646,6 +889,23 @@ canvas {
 	animation: gremlin 3s infinite linear;
 }
 
+.thing-santa {
+	height: 66px;
+	width: 71px;
+}
+
+.thing-santa i {
+	background-image: url(items.png);
+	background-position: -126px -607px;
+	height: 66px;
+	width: 71px;
+	display: block;
+	-webkit-animation: santa 3s infinite linear;
+	-moz-animation: santa 3s infinite linear;
+	-o-animation: santa 3s infinite linear;
+	animation: santa 3s infinite linear;
+}
+
 .thing-snowflake {
 	height: 57px;
 	width: 62px;
@@ -656,6 +916,23 @@ canvas {
 	background-position: -133px -531px;
 	height: 57px;
 	width: 62px;
+	display: block;
+	-webkit-animation: snowflake 3s infinite linear;
+	-moz-animation: snowflake 3s infinite linear;
+	-o-animation: snowflake 3s infinite linear;
+	animation: snowflake 3s infinite linear;
+}
+
+.thing-star {
+	height: 68px;
+	width: 68px;
+}
+
+.thing-star i {
+	background-image: url(items.png);
+	background-position: -320px -447px;
+	height: 68px;
+	width: 68px;
 	display: block;
 	-webkit-animation: snowflake 3s infinite linear;
 	-moz-animation: snowflake 3s infinite linear;

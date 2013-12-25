@@ -1,18 +1,18 @@
 var Game = function() {
 	stop = false;
+
 	var path = 'gfx/', 
 		players = [], 
 		dimensions = [0, 0], 
 		things = [], 
 		that = this, 
 		canvas = document.getElementById('canvas'), 
-		ctx = canvas.getContext("2d");
+		ctx = canvas.getContext('2d');
 
 	$(window).on('resize', function() {
 		dimensions = [$(window).width(), $(window).height()];
 
-		canvas.width = dimensions[0];
-		canvas.height = dimensions[1];
+		canvas.width = dimensions[0]; canvas.height = dimensions[1];
 	}).trigger('resize');
 
 	this.addThingMinTime = 1000;
@@ -83,6 +83,7 @@ var Game = function() {
 
 		this.pos = [0, 0];
 		this.max = [6, 6];
+		this.starCount = 0;
 		this.score = 0;
 		this.speed = [0, 0];
 		this.moving = [0, 0];
@@ -90,8 +91,11 @@ var Game = function() {
 
 		this.color = color || ['yellow', 'green', 'blue', 'red'][Math.floor(Math.random() * 4)];
 
-		this.elka = $('<div class="elka elka-' + this.color + ' elka-normal"><i class="i0"></i><i class="i1"></i><i class="i2"></i><i class="i3"></i><i class="i4"></i><i class="i5"></i></div>');
+		this.elka = $('<div class="elka elka-' + this.color + ' elka-normal"><i class="i0"></i><i class="i1"></i><i class="i2"></i>' +
+			'<i class="i3"></i><i class="i4"></i><i class="i5"></i><b class="star"></b></div>');
 		this.elka.appendTo('body');
+
+		this.elkaStar = this.elka.find('.star');
 
 		var $this = this;
 
@@ -103,11 +107,108 @@ var Game = function() {
 
 	proto.key = function(e) {
 		switch(e.which) {
+			case 32: this.shot(); break;
+
 			case 37: this.moving[0] = e.type == 'keydown' ? -this.moveValue : 0; break;
 			case 38: this.moving[1] = e.type == 'keydown' ? -this.moveValue : 0; break;
 			case 39: this.moving[0] = e.type == 'keydown' ? +this.moveValue : 0; break;
 			case 40: this.moving[1] = e.type == 'keydown' ? +this.moveValue : 0; break;
 		}
+	};
+
+	proto.star = function() {
+		this.starCount++;
+		this.elkaStar.text(this.starCount);
+		this.elka[this.starCount ? 'addClass' : 'removeClass']('elka-star');
+	};
+
+	proto.shot = function() {
+		if (!this.starCount || this.wasShot) return false;
+		this.starCount--; this.wasShot = true;
+
+		this.elkaStar.text(this.starCount);
+
+		if (!this.starCount) this.elka.removeClass('elka-star');
+
+		var shot = $('<div class="shot"></div>'), sp = [this.pos[0] + 122, this.pos[1] + 40];
+		shot.css({ left: sp[0], top: sp[1], width: dimensions[0] });
+		shot.appendTo('body');
+
+		var $this = this;
+		setTimeout(function() {
+			$this.wasShot = false;
+			shot.hide().remove();
+		}, 250);
+
+		for (var i in things) {
+			if (things[i].pos[0] >= sp[0] && !(sp[1] + 28 < things[i].pos[1]) && !(things[i].pos[1] + things[i].type.height < sp[1])) {
+				if (things[i].type.name == 'box') {
+					var id = 'i' + Math.random();
+					things[id] = new Thing(getThingName({secret:true}), id); things[id].pos = [things[i].pos[0], things[i].pos[1]];
+				}
+
+				things[i].boom('#fdc501');
+				things[i].destroy('#fdd957');
+			}
+		}
+
+		for (var i in players) {
+			if (players[i].pos[0] >= sp[0] && !(sp[1] + 28 < players[i].pos[1]) && !(players[i].pos[1] + 106 < sp[1])) {
+				players[i].destroyConsole();
+			}
+		}
+	};
+
+	proto.destroyConsole = function() {
+		if (!this.thingFb) {
+			var $this = this;
+
+			this.speed = [0, 0];
+			this.moving = [0, 0];
+			this.moveValue = -this.moveValue;
+
+			this.thingFb = true;
+
+			trembling(100, 100, function() {
+				$this.elka.removeClass('elka-frozen');
+				$this.pos[0] += Math.random() * 3 - 6;
+				$this.pos[1] += Math.random() * 3 - 6;
+			}, function() {
+				$this.elka.addClass('elka-frozen');
+				$this.pos[0] += Math.random() * 3 - 6;
+				$this.pos[1] += Math.random() * 3 - 6;
+			}, function() {
+				$this.elka.removeClass('elka-frozen');
+				$this.moveValue = -$this.moveValue;
+				$this.thingFb = false;
+			});
+		}
+	}
+
+	proto.slowSpeed = function() {
+		var $this = this;
+
+		this.score -= 10;
+		this.speed = [0, 0];
+		this.moving = [0, 0];
+		this.max = [1, 1];
+		this.moveValue /= 6;
+		this.elka.addClass('elka-frozen');
+
+		if (this.thingSf) clearTimeout(this.thingSf);
+
+		this.thingSf = setTimeout(function() {
+			trembling(5, 100, function() {
+				$this.elka.removeClass('elka-frozen');
+			}, function() {
+				$this.elka.addClass('elka-frozen');
+			}, function() {
+				$this.elka.removeClass('elka-frozen');
+				$this.moveValue *= 6;
+				$this.max = [6, 6];
+			});
+
+		}, 10000);
 	}
 
 	proto.playerTick = function() {
@@ -149,7 +250,7 @@ var Game = function() {
 
 		if (prevPos[0] != this.pos[0] || prevPos[1] != this.pos[1] || this.thingFb)
 			this.elka.css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') + '(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
-	}
+	};
 
 	players[0] = new Player();
 
@@ -226,6 +327,71 @@ var Game = function() {
 			height: 59
 		},
 
+		box: {
+			role: 'bad',
+			name: 'box',
+			content: '<i></i>',
+			style: {},
+			bang: function(gamer, thing) {
+				gamer.thingFb = true;
+				trembling(20, 100, function() {
+					thing.pos[1] += 10;
+					gamer.pos[0] += Math.random() * 10 - 5;
+					gamer.pos[1] += Math.random() * 10 - 5;
+				}, function() {
+					thing.pos[1] += 10;
+					gamer.pos[0] += Math.random() * 10 - 5;
+					gamer.pos[1] += Math.random() * 10 - 5;
+				}, function() {
+					gamer.thingFb = false;
+					thing.destroy('#6fdefb');
+				});
+			},
+			width: 74,
+			height: 85
+		},
+
+		candy: {
+			role: 'secret',
+			name: 'candy',
+			content: '<i></i>',
+			style: {},
+			bang: function(gamer, thing) {
+				gamer.score += 300;
+				thing.boom('#f0b546');
+				thing.destroy('#bd3d24');
+			},
+			width: 62,
+			height: 53
+		},
+
+		candycane: {
+			role: 'secret',
+			name: 'candycane',
+			content: '<i></i>',
+			style: {},
+			bang: function(gamer, thing) {
+				gamer.score += 300;
+				thing.boom('#ffffff');
+				thing.destroy('#bd3d24');
+			},
+			width: 42,
+			height: 52
+		},
+
+		cookie: {
+			role: 'secret',
+			name: 'cookie',
+			content: '<i></i>',
+			style: {},
+			bang: function(gamer, thing) {
+				gamer.score += 300;
+				thing.destroy('#e27c3d'); 
+			},
+			width: 42,
+			height: 52
+		},
+
 		deer: {
 			role: 'good',
 			name: 'deer',
@@ -267,27 +433,7 @@ var Game = function() {
 				thing.destroy('#fdd857');
 
 				gamer.score -= 50;
-				if (!gamer.thingFb) {
-					gamer.speed = [0, 0];
-					gamer.moving = [0, 0];
-					gamer.moveValue = -gamer.moveValue;
-
-					gamer.thingFb = true;
-
-					trembling(100, 100, function() {
-						gamer.elka.removeClass('elka-frozen');
-						gamer.pos[0] += Math.random() * 3 - 6;
-						gamer.pos[1] += Math.random() * 3 - 6;
-					}, function() {
-						gamer.elka.addClass('elka-frozen');
-						gamer.pos[0] += Math.random() * 3 - 6;
-						gamer.pos[1] += Math.random() * 3 - 6;
-					}, function() {
-						gamer.elka.removeClass('elka-frozen');
-						gamer.moveValue = -gamer.moveValue;
-						gamer.thingFb = false;
-					});
-				}
+				gamer.destroyConsole();
 			},
 			width: 76,
 			height: 76
@@ -326,6 +472,25 @@ var Game = function() {
 			height: 59
 		},
 
+		santa: {
+			role: 'bad',
+			name: 'santa',
+			content: '<i></i>',
+			style: {},
+			bang: function(gamer, thing) {
+				thing.destroy('#e45136');
+
+				for (var i in things) {
+					var id = 'i' + Math.random();
+					things[id] = new Thing('box', id); things[id].pos = [things[i].pos[0], things[i].pos[1]];
+
+					things[i].destroy('#ffffff');
+				}
+			},
+			width: 92,
+			height: 59
+		},
+
 		snowflake: {
 			role: 'bad',
 			name: 'snowflake',
@@ -333,31 +498,23 @@ var Game = function() {
 			style: {},
 			bang: function(gamer, thing) {
 				thing.destroy('#ffffff');
-
-				gamer.score -= 10;
-				gamer.speed = [0, 0];
-				gamer.moving = [0, 0];
-				gamer.max = [1, 1];
-				gamer.moveValue /= 6;
-				gamer.elka.addClass('elka-frozen');
-
-				if (gamer.thingSf) clearTimeout(gamer.thingSf);
-
-				gamer.thingSf = setTimeout(function() {
-					trembling(5, 100, function() {
-						gamer.elka.removeClass('elka-frozen');
-					}, function() {
-						gamer.elka.addClass('elka-frozen');
-					}, function() {
-						gamer.elka.removeClass('elka-frozen');
-						gamer.moveValue *= 6;
-						gamer.max = [6, 6];
-					});
-
-				}, 10000);
+				gamer.slowSpeed();
 			},
 			width: 62,
 			height: 57
+		},
+
+		star: {
+			role: 'good',
+			name: 'star',
+			content: '<i></i>',
+			style: {},
+			bang: function(gamer, thing) {
+				thing.destroy('#fdd957');
+				gamer.star();
+			},
+			width: 68,
+			height: 68
 		},
 
 		ygremlin: {
@@ -417,8 +574,12 @@ var Game = function() {
 			'(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
 	};
 
+	proto.boom = function(color) {
+		createExplosion(this.pos[0], this.pos[1] + this.type.height / 2, color);
+	}
+
 	proto.destroy = function(createBoom) {
-		createBoom && createExplosion(this.pos[0], this.pos[1] + this.type.height / 2, createBoom);
+		createBoom && this.boom(createBoom);
 
 		that.tickFunctionRemove(this.tickFn);
 		this.item.remove();
@@ -429,21 +590,27 @@ var Game = function() {
 		return this.type.bang(gamer, this);
 	};
 
+	var getThingName = function(role) {
+		do {
+			var i = Object.keys(thingTypes)[Math.floor(Math.random() * Object.keys(thingTypes).length)];
+		} while (!(thingTypes[i].role in role));
+
+		return i;
+	};
+
 	var addThingTime = new Date().getTime();
-	addThing = function() {
+	var addThing = function() {
 		var now = new Date().getTime(), dt = now - (addThingTime || now);
 		if (dt > that.addThingMinTime) {
 			addThingTime = now;
 
 			var id = 'i' + Math.random();
-			things[id] = new Thing(mode == 'random' ? Object.keys(thingTypes)[Math.floor(Math.random() * Object.keys(thingTypes).length)] : mode, id);
+			things[id] = new Thing(mode == 'random' ? getThingName({good:true, bad:true}) : mode, id);
 		}
 	};
 	this.tickFunctionAdd(addThing);
 
-	testIntersection = function() {
-		// ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+	var testIntersection = function() {
 		var plGamers = [], plItems = [];
 		for (var i in players) {
 			if (!plGamers[i]) {
@@ -465,8 +632,6 @@ var Game = function() {
 				plGamers[i].addAbsolutePoint([players[i].pos[0] + 4, players[i].pos[1] + 65]);
 			}
 
-			// plGamers[i].draw(ctx);
-
 			for (var k in things) {
 				if (!plItems[k]) {
 					plItems[k] = new Polygon({x:0,y:0}, '#0000FF');
@@ -476,7 +641,6 @@ var Game = function() {
 					plItems[k].addAbsolutePoint([things[k].pos[0], things[k].pos[1] + things[k].type.height]);
 				}
 
-				// plItems[k].draw(ctx);
 				var is = plGamers[i].intersectsWith(plItems[k]);
 				if (is) things[k].bang(players[i]);
 			}
@@ -485,8 +649,9 @@ var Game = function() {
 
 	this.tickFunctionAdd(testIntersection);
 
-	// Explosions
+	// Canvas print
 	this.tickFunctionAdd(function() {
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		update(1000 / 60, ctx);
 	});
 };
@@ -729,7 +894,7 @@ Polygon.prototype.intersectsWith = function (other) {
 
 /***** Explosion Effect *****/
 // Source: http://www.gameplaypassion.com/blog/explosion-effect-html5-canvas/
-var particles = [];
+var particles = {};
 
 function randomFloat (min, max) { return min + Math.random()*(max-min); }
 
@@ -744,25 +909,23 @@ function Particle () {
 	this.scaleSpeed = 0.5;
 
 	this.update = function(ms) {
-		// shrinking
 		this.scale -= this.scaleSpeed * ms / 1000.0;
 
 		if (this.scale <= 0) {
 			this.scale = 0;
+			return false;
 		}
 
-		// moving away from explosion center
 		this.x += this.velocityX * ms/1000.0;
 		this.y += this.velocityY * ms/1000.0;
+		return true;
 	};
 
 	this.draw = function(context2D) {
-		// translating the 2D context to the particle coordinates
 		context2D.save();
 		context2D.translate(this.x, this.y);
 		context2D.scale(this.scale, this.scale);
 
-		// drawing a filled circle in the particle's local space
 		context2D.beginPath();
 		context2D.arc(0, 0, this.radius, 0, Math.PI*2, true);
 		context2D.closePath();
@@ -800,22 +963,23 @@ function createExplosion(x, y, color) {
 		particle.velocityX = speed * Math.cos(angle * Math.PI / 180.0);
 		particle.velocityY = speed * Math.sin(angle * Math.PI / 180.0);
 
-		particles.push(particle);
+		particles['i' + Math.random()] = particle;
 	}
 }
 
 function update (frameDelay, context2D) {
-	context2D.clearRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-
-	for (var i=0; i<particles.length; i++) {
+	for (var i in particles) {
 		var particle = particles[i];
 
-		particle.update(frameDelay);
-		particle.draw(context2D);
+		var i = particle.update(frameDelay);
+		if (i) {
+			particle.draw(context2D);
+		} else {
+			delete particles[i];
+		}
 	}
 }
 
 $(function() {
 	var game = new Game();
-	console.log(game);
 });

@@ -4,6 +4,7 @@
 	<link rel="stylesheet" type="text/css" href="gfx/normalize.css" />
 	<link rel="stylesheet" type="text/css" href="gfx/common.css" />
 
+<!--
 	<script src="http://2014.studio38.ru:8088/socket.io/socket.io.js"></script>
 	<script>
 		var socket = io.connect('http://2014.studio38.ru:8088');
@@ -12,6 +13,7 @@
 			socket.emit('my other event', { my: 'data' });
 		});
 	</script>
+-->
 
 	<script type="text/javascript" src="gfx/jquery2.js"></script>
 	<script type="text/javascript" src="gfx/modernizr.js"></script>
@@ -23,10 +25,12 @@
 	<!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 </head>
 <body>
-	<div class="bg bg3"></div>
-	<div class="bg bg2"></div>
-	<div class="bg bg1"></div>
+	<div id="game">
+		<div class="bg bg3"></div>
+		<div class="bg bg2"></div>
+		<div class="bg bg1"></div>
 
-	<canvas id="canvas"></canvas>
+		<canvas id="canvas"></canvas>
+	</div>
 </body>
 </html>
