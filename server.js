@@ -38,7 +38,7 @@ io.sockets.on('connection', function (socket) {
 	socket.on('newGame', function() {
 		var gameID;
 		do {
-			gameID = parseInt(getFloatRand(1000, 99999));
+			gameID = parseInt(getFloatRand(1, 10));
 		} while (typeof games[gameID] != 'undefined');
 
 		games[gameID] = {
@@ -56,7 +56,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	socket.on('newPlayer', function() {
-		var playerID = 'i' + Math.random();
+		var playerID = 'i' + Math.random().toString().substr(2);
 
 		players[playerID] = {
 			socket: socket,
@@ -67,14 +67,49 @@ io.sockets.on('connection', function (socket) {
 		socket.emit('id', { id: playerID });
 	});
 
+	socket.on('shot', function(data) {
+		console.log('shot', data);
+
+		if (!games[data.gameID]) {
+			socket.emit('system', { status: 'no game' });
+			return false;
+		}
+
+		if (Object.keys(games[data.gameID].players).length > 3 || games[data.gameID].started) {
+			socket.emit('system', { status: 'no places' });
+			return false;
+		}
+
+		games[data.gameID].socket.emit('shot', { playerID: data.playerID });
+	});
+
+	socket.on('move', function(data) {
+		if (!games[data.gameID]) {
+
+			socket.emit('system', { status: 'no game' });
+			return false;
+		}
+
+		if (Object.keys(games[data.gameID].players).length > 3 || games[data.gameID].started) {
+			socket.emit('system', { status: 'no places' });
+			return false;
+		}
+
+		games[data.gameID].socket.emit('move', { playerID: data.playerID, x: data.speedX, y: data.speedY });
+	});
+
 	socket.on('disconnect', function() {
 		socket.get('gameID', function(err, gameID) {
 			if (!gameID) {
 				socket.get('playerID', function(err, playerID) {
 					// нужно узнать gameID у данного игрока, если оно есть
 					// socket.emit('system' + gameID, { status: 'client-off', playerID: playerID });
-					if (players[playerID] && players[playerID].gameID && games[players[playerID].gameID] && games[players[playerID].gameID].socket)
+					if (players[playerID] && players[playerID].gameID && games[players[playerID].gameID] && games[players[playerID].gameID].socket) {
+						games[players[playerID].gameID].colors.push(games[players[playerID].gameID].players[playerID].color);
+						delete games[players[playerID].gameID].players[playerID];
+
 						games[players[playerID].gameID].socket.emit('system', { status: 'player-off', playerID: playerID });
+					}
 
 					delete players[playerID];
 				});
@@ -88,7 +123,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	socket.on('joinGame', function(data) {
-		if (!games[data.gameID]) {
+		if (!games[data.gameID] || !players[data.playerID]) {
 			socket.emit('system', { status: 'no game' });
 			return false;
 		}

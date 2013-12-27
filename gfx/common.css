@@ -37,7 +37,9 @@ canvas {
 .elka {
 	display: block;
 	height: 106px;
-	position: relative;
+	left: 0px;
+	position: absolute;
+	top: 0px;
 	width: 150px;
 	z-index: 100;
 }
@@ -955,4 +957,8 @@ canvas {
 	-moz-animation: gremlin 3s infinite linear;
 	-o-animation: gremlin 3s infinite linear;
 	animation: gremlin 3s infinite linear;
+}
+
+.players_ico li.no_ava.red {
+	background-position: 0 -50px;
 }

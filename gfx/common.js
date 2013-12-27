@@ -12,6 +12,7 @@ var Game = function(gameID) {
 	$(window).on('resize', function() {
 		dimensions = [$(window).width(), $(window).height()];
 
+		$('#game').width(dimensions[0]).height(dimensions[1]);
 		canvas.width = dimensions[0]; canvas.height = dimensions[1];
 	}).trigger('resize');
 
@@ -77,180 +78,6 @@ var Game = function(gameID) {
 			}
 		});
 	}());
-
-	var Player = function(color) {
-		this.moveValue = 0.3;
-
-		this.pos = [0, 0];
-		this.max = [6, 6];
-		this.starCount = 0;
-		this.score = 0;
-		this.speed = [0, 0];
-		this.moving = [0, 0];
-		this.dimensions = [150, 106];
-
-		this.color = color || ['yellow', 'green', 'blue', 'red'][Math.floor(Math.random() * 4)];
-
-		this.elka = $('<div class="elka elka-' + this.color + ' elka-normal"><i class="i0"></i><i class="i1"></i><i class="i2"></i>' +
-			'<i class="i3"></i><i class="i4"></i><i class="i5"></i><b class="star"></b></div>');
-		this.elka.appendTo('body');
-
-		this.elkaStar = this.elka.find('.star');
-
-		var $this = this;
-
-		$(document).on('keydown keyup', function(e) { $this.key(e) });
-		that.tickFunctionAdd(function() { $this.playerTick() });
-	}
-
-	var proto = Player.prototype;
-
-	proto.key = function(e) {
-		switch(e.which) {
-			case 32: this.shot(); break;
-
-			case 37: this.moving[0] = e.type == 'keydown' ? -this.moveValue : 0; break;
-			case 38: this.moving[1] = e.type == 'keydown' ? -this.moveValue : 0; break;
-			case 39: this.moving[0] = e.type == 'keydown' ? +this.moveValue : 0; break;
-			case 40: this.moving[1] = e.type == 'keydown' ? +this.moveValue : 0; break;
-		}
-	};
-
-	proto.star = function() {
-		this.starCount++;
-		this.elkaStar.text(this.starCount);
-		this.elka[this.starCount ? 'addClass' : 'removeClass']('elka-star');
-	};
-
-	proto.shot = function() {
-		if (!this.starCount || this.wasShot) return false;
-		this.starCount--; this.wasShot = true;
-
-		this.elkaStar.text(this.starCount);
-
-		if (!this.starCount) this.elka.removeClass('elka-star');
-
-		var shot = $('<div class="shot"></div>'), sp = [this.pos[0] + 122, this.pos[1] + 40];
-		shot.css({ left: sp[0], top: sp[1], width: dimensions[0] });
-		shot.appendTo('body');
-
-		var $this = this;
-		setTimeout(function() {
-			$this.wasShot = false;
-			shot.hide().remove();
-		}, 250);
-
-		for (var i in things) {
-			if (things[i].pos[0] >= sp[0] && !(sp[1] + 28 < things[i].pos[1]) && !(things[i].pos[1] + things[i].type.height < sp[1])) {
-				if (things[i].type.name == 'box') {
-					var id = 'i' + Math.random();
-					things[id] = new Thing(getThingName({secret:true}), id); things[id].pos = [things[i].pos[0], things[i].pos[1]];
-				}
-
-				things[i].boom('#fdc501');
-				things[i].destroy('#fdd957');
-			}
-		}
-
-		for (var i in players) {
-			if (players[i].pos[0] >= sp[0] && !(sp[1] + 28 < players[i].pos[1]) && !(players[i].pos[1] + 106 < sp[1])) {
-				players[i].destroyConsole();
-			}
-		}
-	};
-
-	proto.destroyConsole = function() {
-		if (!this.thingFb) {
-			var $this = this;
-
-			this.speed = [0, 0];
-			this.moving = [0, 0];
-			this.moveValue = -this.moveValue;
-
-			this.thingFb = true;
-
-			trembling(100, 100, function() {
-				$this.elka.removeClass('elka-frozen');
-				$this.pos[0] += Math.random() * 3 - 6;
-				$this.pos[1] += Math.random() * 3 - 6;
-			}, function() {
-				$this.elka.addClass('elka-frozen');
-				$this.pos[0] += Math.random() * 3 - 6;
-				$this.pos[1] += Math.random() * 3 - 6;
-			}, function() {
-				$this.elka.removeClass('elka-frozen');
-				$this.moveValue = -$this.moveValue;
-				$this.thingFb = false;
-			});
-		}
-	}
-
-	proto.slowSpeed = function() {
-		var $this = this;
-
-		this.score -= 10;
-		this.speed = [0, 0];
-		this.moving = [0, 0];
-		this.max = [1, 1];
-		this.moveValue /= 6;
-		this.elka.addClass('elka-frozen');
-
-		if (this.thingSf) clearTimeout(this.thingSf);
-
-		this.thingSf = setTimeout(function() {
-			trembling(5, 100, function() {
-				$this.elka.removeClass('elka-frozen');
-			}, function() {
-				$this.elka.addClass('elka-frozen');
-			}, function() {
-				$this.elka.removeClass('elka-frozen');
-				$this.moveValue *= 6;
-				$this.max = [6, 6];
-			});
-
-		}, 10000);
-	}
-
-	proto.playerTick = function() {
-		var prevPos = [this.pos[0], this.pos[1]];
-
-		// Устанавливаем текущую скорость
-		this.speed[0] += this.moving[0];
-		if (!this.moving[0] && this.speed[0]) this.speed[0] += this.speed[0] > 0 ? -this.moveValue : this.moveValue;
-		if (this.speed[0] > this.max[0]) this.speed[0] = this.max[0]; if (this.speed[0] < -this.max[0]) this.speed[0] = -this.max[0];
-
-		this.speed[1] += this.moving[1];
-		if (!this.moving[1] && this.speed[1]) this.speed[1] += this.speed[1] > 0 ? -this.moveValue : this.moveValue;
-		if (this.speed[1] > this.max[1]) this.speed[1] = this.max[1]; if (this.speed[1] < -this.max[1]) this.speed[1] = -this.max[1];
-
-		this.speed[0] = parseFloat(this.speed[0].toFixed(3));
-		this.speed[1] = parseFloat(this.speed[1].toFixed(3));
-
-		this.pos[0] += this.speed[0]; this.pos[1] += this.speed[1];
-
-		if (this.pos[0] < 0) {
-			this.pos[0] = 0;
-			this.speed[0] = 0;
-		}
-
-		if (this.pos[1] < 0) {
-			this.pos[1] = 0;
-			this.speed[1] = 0;
-		}
-
-		if (this.pos[0] + this.dimensions[0] > dimensions[0]) {
-			this.pos[0] = dimensions[0] - this.dimensions[0];
-			this.speed[0] = 0;
-		}
-
-		if (this.pos[1] + this.dimensions[1] > dimensions[1]) {
-			this.pos[1] = dimensions[1] - this.dimensions[1];
-			this.speed[1] = 0;
-		}
-
-		if (prevPos[0] != this.pos[0] || prevPos[1] != this.pos[1] || this.thingFb)
-			this.elka.css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') + '(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
-	};
 
 	function trembling(times, timeout, odd, even, callback) {
 		var count = 0, int;
@@ -552,7 +379,7 @@ var Game = function(gameID) {
 
 		this.item.css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') +
 			'(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
-		this.item.appendTo('body');
+		this.item.appendTo('#game');
 
 		if (typeof this.type.create == 'function') this.type.create();
 
@@ -610,6 +437,8 @@ var Game = function(gameID) {
 	var testIntersection = function() {
 		var plGamers = [], plItems = [];
 		for (var i in players) {
+			if (players[i].disabled) continue;
+
 			if (!plGamers[i]) {
 				plGamers[i] = new Polygon({x:0,y:0}, '#00FF00');
 				plGamers[i].addAbsolutePoint([players[i].pos[0], players[i].pos[1] + 43]);
@@ -644,11 +473,192 @@ var Game = function(gameID) {
 		}
 	};
 
+	var Player = function(color, id) {
+		this.moveValue = 0.3;
+
+		this.id = id;
+		this.disabled = false;
+		this.pos = [0, 0];
+		this.max = [6, 6];
+		this.starCount = 0;
+		this.score = 0;
+		this.speed = [0, 0];
+		this.moving = [0, 0];
+		this.dimensions = [150, 106];
+
+		this.color = color || ['yellow', 'green', 'blue', 'red'][Math.floor(Math.random() * 4)];
+
+		this.elka = $('<div class="elka elka-' + this.color + ' elka-normal"><i class="i0"></i><i class="i1"></i><i class="i2"></i>' +
+			'<i class="i3"></i><i class="i4"></i><i class="i5"></i><b class="star"></b></div>');
+		this.elka.appendTo('#game');
+
+		this.elkaStar = this.elka.find('.star');
+
+		var $this = this;
+
+		that.tickFunctionAdd(function() { $this.playerTick() });
+	}
+
+	var proto = Player.prototype;
+
+	proto.destroy = function() {
+		this.disabled = true;
+		this.posChangedManually = true;
+		var $this = this;
+
+		createExplosion(this.pos[0] + 75, this.pos[1] + 53, '#ff0');
+		$this.elka.remove();
+		delete players[$this.id];
+	};
+
+	proto.star = function() {
+		this.starCount++;
+		this.elkaStar.text(this.starCount);
+		this.elka[this.starCount ? 'addClass' : 'removeClass']('elka-star');
+	};
+
+	proto.shot = function() {
+		if (!this.starCount || this.wasShot) return false;
+		this.starCount--; this.wasShot = true;
+
+		this.elkaStar.text(this.starCount);
+
+		if (!this.starCount) this.elka.removeClass('elka-star');
+
+		var shot = $('<div class="shot"></div>'), sp = [this.pos[0] + 122, this.pos[1] + 40];
+		shot.css({ left: sp[0], top: sp[1], width: dimensions[0] });
+		shot.appendTo('#game');
+
+		var $this = this;
+		setTimeout(function() {
+			$this.wasShot = false;
+			shot.hide().remove();
+		}, 250);
+
+		for (var i in things) {
+			if (things[i].pos[0] >= sp[0] && !(sp[1] + 28 < things[i].pos[1]) && !(things[i].pos[1] + things[i].type.height < sp[1])) {
+				if (things[i].type.name == 'box') {
+					var id = 'i' + Math.random();
+					things[id] = new Thing(getThingName({secret:true}), id); things[id].pos = [things[i].pos[0], things[i].pos[1]];
+				}
+
+				things[i].boom('#fdc501');
+				things[i].destroy('#fdd957');
+			}
+		}
+
+		for (var i in players) {
+			if (players[i].pos[0] >= sp[0] && !(sp[1] + 28 < players[i].pos[1]) && !(players[i].pos[1] + 106 < sp[1])) {
+				players[i].destroyConsole();
+			}
+		}
+	};
+
+	proto.destroyConsole = function() {
+		if (!this.thingFb) {
+			var $this = this;
+
+			this.speed = [0, 0];
+			this.moving = [0, 0];
+			this.moveValue = -this.moveValue;
+
+			this.thingFb = true;
+
+			trembling(100, 100, function() {
+				$this.elka.removeClass('elka-frozen');
+				$this.pos[0] += Math.random() * 3 - 6;
+				$this.pos[1] += Math.random() * 3 - 6;
+			}, function() {
+				$this.elka.addClass('elka-frozen');
+				$this.pos[0] += Math.random() * 3 - 6;
+				$this.pos[1] += Math.random() * 3 - 6;
+			}, function() {
+				$this.elka.removeClass('elka-frozen');
+				$this.moveValue = -$this.moveValue;
+				$this.thingFb = false;
+			});
+		}
+	}
+
+	proto.slowSpeed = function() {
+		var $this = this;
+
+		this.score -= 10;
+		this.speed = [0, 0];
+		this.moving = [0, 0];
+		this.max = [1, 1];
+		this.moveValue /= 6;
+		this.elka.addClass('elka-frozen');
+
+		if (this.thingSf) clearTimeout(this.thingSf);
+
+		this.thingSf = setTimeout(function() {
+			trembling(5, 100, function() {
+				$this.elka.removeClass('elka-frozen');
+			}, function() {
+				$this.elka.addClass('elka-frozen');
+			}, function() {
+				$this.elka.removeClass('elka-frozen');
+				$this.moveValue *= 6;
+				$this.max = [6, 6];
+			});
+
+		}, 10000);
+	}
+
+	proto.playerTick = function() {
+		var prevPos = [this.pos[0], this.pos[1]];
+
+		// Устанавливаем текущую скорость
+		this.speed[0] += this.moving[0];
+		if (!this.moving[0] && this.speed[0]) {
+			var ws = this.speed[0] > 0;
+			this.speed[0] += this.speed[0] > 0 ? -this.moveValue * 5 : this.moveValue * 5;
+			if (ws && this.speed[0] < 0) this.speed[0] = 0;
+		}
+		if (this.speed[0] > this.max[0]) this.speed[0] = this.max[0]; if (this.speed[0] < -this.max[0]) this.speed[0] = -this.max[0];
+
+		this.speed[1] += this.moving[1];
+		if (!this.moving[1] && this.speed[1]) {
+			var ws = this.speed[1] > 0;
+			this.speed[1] += this.speed[1] > 0 ? -this.moveValue * 5 : this.moveValue * 5;
+			if (ws && this.speed[1] < 0) this.speed[1] = 0;
+		}
+		if (this.speed[1] > this.max[1]) this.speed[1] = this.max[1]; if (this.speed[1] < -this.max[1]) this.speed[1] = -this.max[1];
+
+		this.speed[0] = parseFloat(this.speed[0].toFixed(3));
+		this.speed[1] = parseFloat(this.speed[1].toFixed(3));
+
+		this.pos[0] += this.speed[0]; this.pos[1] += this.speed[1];
+
+		if (this.pos[0] < 0) {
+			this.pos[0] = 0;
+			this.speed[0] = 0;
+		}
+
+		if (this.pos[1] < 0) {
+			this.pos[1] = 0;
+			this.speed[1] = 0;
+		}
+
+		if (this.pos[0] + this.dimensions[0] > dimensions[0]) {
+			this.pos[0] = dimensions[0] - this.dimensions[0];
+			this.speed[0] = 0;
+		}
+
+		if (this.pos[1] + this.dimensions[1] > dimensions[1]) {
+			this.pos[1] = dimensions[1] - this.dimensions[1];
+			this.speed[1] = 0;
+		}
+
+		if (prevPos[0] != this.pos[0] || prevPos[1] != this.pos[1] || this.thingFb || this.posChangedManually)
+			this.elka.css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') + '(' + this.pos[0] + 'px, ' + this.pos[1] + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
+	};
+
 	this.players = players;
 
 	this.startGame = function() {
 		this.tickEvent();
-		players[0] = new Player('yellow');
 		this.tickFunctionAdd(addThing);
 		this.tickFunctionAdd(testIntersection);
 
@@ -660,9 +670,150 @@ var Game = function(gameID) {
 	};
 
 	this.newPlayer = function(id, color) {
-		players[id] = new Player(color);
+		players[id] = new Player(color, id);
 	}
 };
+
+$(function() {
+	var socket = io.connect('http://2014.studio38.ru:8089'), gameID;
+	var game = new Game(), gameStarted = false;
+
+	socket.emit('newGame');
+	socket.on('id', function(data) {
+		gameID = data.id;
+
+		$('.second_screen_code').text(gameID);
+
+		socket.on('system', function(data) {
+			switch(data.status) {
+				case 'player-off':
+					$('#av_' + data.playerID).fadeOut(function() { $(this).remove(); });
+					game.players[data.playerID].destroy();
+					break;
+
+				case 'new player':
+					$('.players_ico').append('<li id="av_' + data.playerID + '" class="' + data.color + ' authorization no_ava"></li>');
+					game.newPlayer(data.playerID, data.color);
+					break;
+			}
+		});
+
+		socket.on('move', function(data) {
+			if (gameStarted) {
+				game.players[data.playerID].moving[0] = data.x == 0 ? 0 : ((data.x > 0 ? 1 : -1) * game.players[data.playerID].moveValue);
+				game.players[data.playerID].moving[1] = data.y == 0 ? 0 : ((data.y > 0 ? 1 : -1) * game.players[data.playerID].moveValue);
+			} else {
+				$('#av_' + data.playerID).css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') +
+					'(' + (data.x / 10) + 'px, ' + (data.y / 10) + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
+			}
+		});
+
+		socket.on('shot', function(data) {
+			game.players[data.playerID].shot();
+		});
+	});
+
+	// intro animation
+	var indexArr = [5, 5, 5, 5];
+ 	function elkaAnimate(index) {
+		$('.front_elka_'+(index + 1)).find('div').eq(indexArr[index]).addClass('elka_animate');
+		indexArr[index] = indexArr[index] - 1;
+		if (indexArr[index] >= 0) {
+			setTimeout(function() {
+				elkaAnimate(index);
+			}, 70);
+		} else {
+			setTimeout(function() {
+				$('.front_elka_'+(index + 1)).find('div').removeClass('elka_animate');
+				indexArr[index] = 5;
+			}, 1000);
+		}	
+	}
+
+	var introAnimateIndex = [1, 3, 2, 4],
+		atroI = 0,
+		step2Count = 0;
+
+	function introAnimate() {
+		$('.intro_elka_'+introAnimateIndex[atroI]).addClass('color');
+		atroI++;
+		if (atroI < 4) {
+			setTimeout(introAnimate, 800);
+		} else {
+			setTimeout(introAnimateStep2, 1000);
+		}
+	}
+
+	function introAnimateStep2() {
+		$('.intro_elka.color').eq(step2Count).addClass('go_up');
+		step2Count++;
+		if (step2Count < $('.intro_elka.color').length) {
+			setTimeout(introAnimateStep2, 200);	
+		} else {
+			// alert('Сюда хуярь старт игры!');
+			$('.first_screen').hide();
+
+			$('#game').show();
+			game.startGame();
+			gameStarted = true;
+		}
+	}
+
+	var animeteIndex = 0,
+		elkaAnimated = true; 
+	function startAnimate() {
+		elkaAnimate(animeteIndex);
+		animeteIndex++;
+		if (animeteIndex <= 3) {
+			setTimeout(startAnimate, 800);
+		} else {
+			animeteIndex = 0;
+			if(elkaAnimated)
+				setTimeout(startAnimate, 5000);
+		}	
+	}
+	startAnimate();
+
+	// snow
+	/*
+	window.rnd = function(from, to) { return Math.ceil(Math.random() * to + from); };
+	var cn = 0;
+    var ci = setInterval(function() {
+        var cnt = Math.ceil(Math.random() * 10);
+        for (var i = 0; i < cnt; i++) {
+            cn = cn + 1;
+            var l = Math.ceil(rnd(0, $(window).width())),
+				t = Math.ceil(rnd(0, $(window).height() / 6) - 100);
+            $('.front_elka_wrap').append('<i id="cn' + cn + '" class="snow" style="top: '+ t +'px; left: ' + l + 'px"></i>');
+            var thisSnow = $('#cn' + cn);
+            $(thisSnow).animate({
+                left: l + parseInt((Math.random() - 0.5) * 6) * 32,
+                top: ($(window).height() - 20)
+            }, 5000, 'linear', function() {
+                $(this).addClass('notransition').animate({
+                    opacity: 0
+                }, function() {
+                    $(this).remove();
+                });
+                
+            }).addClass('fade');
+        }
+    }, 500);
+	*/
+
+    $('.first_btn').click(function() {
+    	elkaAnimated = false;
+    	$('.front_elka_wrap_inner').fadeOut(800);
+    	$('.first_screen_center').fadeOut(800, function() {
+    		$('.animate_wrap').fadeIn();
+    	});
+    });
+    
+    $('.start_btn').click(function() {
+    	$('.animate_wrap').addClass('startanimate');
+		setTimeout(introAnimate, 2500);	
+    });
+});
 
 /***** requestAnimationFrame polyfill *****/
 // Source: http://html5.by/blog/what-is-requestanimationframe/
@@ -987,124 +1138,3 @@ function update (frameDelay, context2D) {
 		}
 	}
 }
-
-$(function() {
-	var socket = io.connect('http://2014.studio38.ru:8089'), gameID;
-	var game = new Game();
-
-	socket.emit('newGame');
-	socket.on('id', function(data) {
-		gameID = data.id;
-
-		$('.second_screen_code').text(gameID);
-
-		socket.on('system', function(data) {
-			switch(data.status) {
-				case 'new player':
-					$('.players_ico').append('<li id="av_' + data.playerID + '" class="' + data.color + ' authorization no_ava"></li>');
-					game.addPlayer(data.playerID, data.color);
-					break;
-			}
-		});
-	});
-
-	// intro animation
-	var indexArr = [5, 5, 5, 5];
- 	function elkaAnimate(index) {
-		$('.front_elka_'+(index + 1)).find('div').eq(indexArr[index]).addClass('elka_animate');
-		indexArr[index] = indexArr[index] - 1;
-		if (indexArr[index] >= 0) {
-			setTimeout(function() {
-				elkaAnimate(index);
-			}, 70);	
-		} else {
-			setTimeout(function() {
-				$('.front_elka_'+(index + 1)).find('div').removeClass('elka_animate');
-				indexArr[index] = 5;
-			}, 1000);
-		}	
-	}
-
-	var introAnimateIndex = [1, 3, 2, 4],
-		atroI = 0, 
-		step2Count = 0;
-
-	function introAnimate() {
-		$('.intro_elka_'+introAnimateIndex[atroI]).addClass('color');
-		atroI++;
-		if (atroI < 4) {
-			setTimeout(introAnimate, 800);
-		} else {
-			setTimeout(introAnimateStep2, 1000);
-		}
-	}
-
-	function introAnimateStep2() {
-		$('.intro_elka.color').eq(step2Count).addClass('go_up');
-		step2Count++;
-		if (step2Count < $('.intro_elka.color').length) {
-			setTimeout(introAnimateStep2, 200);	
-		} else {
-			// alert('Сюда хуярь старт игры!');
-			$('.first_screen').hide();
-
-			$('#game').show();
-			game.startGame();
-		}
-	}
-
-	var animeteIndex = 0,
-		elkaAnimated = true; 
-	function startAnimate() {
-		elkaAnimate(animeteIndex);
-		animeteIndex++;
-		if (animeteIndex <= 3) {
-			setTimeout(startAnimate, 800);
-		} else {
-			animeteIndex = 0;
-			if(elkaAnimated)
-				setTimeout(startAnimate, 5000);
-		}	
-	}
-	startAnimate();
-
-	// snow
-	/*
-	window.rnd = function(from, to) { return Math.ceil(Math.random() * to + from); };
-	var cn = 0;
-    var ci = setInterval(function() {
-        var cnt = Math.ceil(Math.random() * 10);
-        for (var i = 0; i < cnt; i++) {
-            cn = cn + 1;
-            var l = Math.ceil(rnd(0, $(window).width())),
-				t = Math.ceil(rnd(0, $(window).height() / 6) - 100);
-            $('.front_elka_wrap').append('<i id="cn' + cn + '" class="snow" style="top: '+ t +'px; left: ' + l + 'px"></i>');
-            var thisSnow = $('#cn' + cn);
-            $(thisSnow).animate({
-                left: l + parseInt((Math.random() - 0.5) * 6) * 32,
-                top: ($(window).height() - 20)
-            }, 5000, 'linear', function() {
-                $(this).addClass('notransition').animate({
-                    opacity: 0
-                }, function() {
-                    $(this).remove();
-                });
-                
-            }).addClass('fade');
-        }
-    }, 500);
-	*/
-
-    $('.first_btn').click(function() {
-    	elkaAnimated = false;
-    	$('.front_elka_wrap_inner').fadeOut(800);
-    	$('.first_screen_center').fadeOut(800, function() {
-    		$('.animate_wrap').fadeIn();
-    	});
-    });
-    
-    $('.start_btn').click(function() {
-    	$('.animate_wrap').addClass('startanimate');
-		setTimeout(introAnimate, 2500);	
-    });
-});
