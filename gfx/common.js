@@ -1,4 +1,4 @@
-var socket;
+var socket, context;
 
 var Game = function(gameID) {
 	stop = false;
@@ -19,7 +19,7 @@ var Game = function(gameID) {
 	}).trigger('resize');
 
 	this.gameID = 0;
-	this.addThingMinTime = 1000;
+	this.addThingMinTime = 500;
 	this.speedMultiplier = 1;
 	this.bgSpeed = 5;
 	this.itemSpeed = 1;
@@ -107,6 +107,7 @@ var Game = function(gameID) {
 				thing.destroy('#8e44ac');
 				gamer.score += 25;
 			},
+			bangMusic: 'ting',
 			width: 40,
 			height: 33
 		},
@@ -120,6 +121,7 @@ var Game = function(gameID) {
 				thing.destroy('#bd3d24');
 				gamer.score += 50;
 			},
+			bangMusic: 'ting2',
 			width: 40,
 			height: 33
 		},
@@ -133,6 +135,7 @@ var Game = function(gameID) {
 				thing.destroy('#27ad5f');
 				gamer.score += 100;
 			},
+			bangMusic: 'ting3',
 			width: 40,
 			height: 33
 		},
@@ -153,6 +156,7 @@ var Game = function(gameID) {
 					things[i].destroy('#6fdefb');
 				}
 			},
+			bandMusic: 'take2',
 			width: 92,
 			height: 59
 		},
@@ -178,6 +182,7 @@ var Game = function(gameID) {
 					thing.destroy('#6fdefb');
 				});
 			},
+			bangMusic: 'glass',
 			width: 74,
 			height: 85
 		},
@@ -192,6 +197,7 @@ var Game = function(gameID) {
 				thing.boom('#f0b546');
 				thing.destroy('#bd3d24');
 			},
+			bangMusic: 'ting',
 			width: 62,
 			height: 53
 		},
@@ -206,6 +212,7 @@ var Game = function(gameID) {
 				thing.boom('#ffffff');
 				thing.destroy('#bd3d24');
 			},
+			bangMusic: 'ting2',
 			width: 42,
 			height: 52
 		},
@@ -219,6 +226,7 @@ var Game = function(gameID) {
 				gamer.score += 300;
 				thing.destroy('#e27c3d'); 
 			},
+			bangMusic: 'ting3',
 			width: 42,
 			height: 52
 		},
@@ -233,10 +241,12 @@ var Game = function(gameID) {
 				gamer.score += 25;
 				thing.destroy('#e27c3d');
 
-				if (that.bgSpeed < 30) {
+				if (that.bgSpeed < 10) {
 					that.bgSpeed += 5;
 					that.itemSpeed++;
 				}
+
+				source.playbackRate.value = 1.5;
 
 				if (thingTypes.deer.deerTimeout) clearTimeout(thingTypes.deer.deerTimeout);
 
@@ -246,6 +256,7 @@ var Game = function(gameID) {
 							that.bgSpeed--;
 							that.itemSpeed -= 0.2;
 						} else {
+							source.playbackRate.value = 1;
 							thingTypes.deer.deerTimeout = false;
 							clearInterval(int);
 						}
@@ -267,6 +278,7 @@ var Game = function(gameID) {
 				gamer.score -= 50;
 				gamer.destroyConsole();
 			},
+			bangMusic: 'wooff-wooff',
 			width: 76,
 			height: 76
 		},
@@ -301,6 +313,7 @@ var Game = function(gameID) {
 					})
 				}, 10000);
 			},
+			bangMusic: 'ha-ha',
 			width: 92,
 			height: 59
 		},
@@ -321,6 +334,7 @@ var Game = function(gameID) {
 					things[i].destroy('#ffffff');
 				}
 			},
+			bangMusic: 'ho-ho-ho',
 			width: 92,
 			height: 59
 		},
@@ -335,6 +349,7 @@ var Game = function(gameID) {
 				gamer.score -= 25;
 				gamer.slowSpeed();
 			},
+			bangMusic: 'uskorenie',
 			width: 62,
 			height: 57
 		},
@@ -368,6 +383,7 @@ var Game = function(gameID) {
 					things[i].destroy('#fdc501');
 				}
 			},
+			bangMusic: 'take2',
 			width: 92,
 			height: 59
 		}
@@ -479,13 +495,19 @@ var Game = function(gameID) {
 				}
 
 				var is = plGamers[i].intersectsWith(plItems[k]);
-				if (is) things[k].bang(players[i]);
+
+				if (is) {
+					if (things[k].type.bangMusic)
+						that.play(things[k].type.bangMusic);
+
+					things[k].bang(players[i]);
+				}
 			}
 		}
 	};
 
 	var Player = function(color, id) {
-		this.moveValue = 0.3;
+		this.moveValue = 1.5;
 
 		this.id = id;
 		this.disabled = false;
@@ -543,6 +565,8 @@ var Game = function(gameID) {
 		this.posChangedManually = true;
 		var $this = this;
 
+		that.play('boom1');
+
 		createExplosion(this.pos[0] + 75, this.pos[1] + 53, '#ff0');
 		$this.elka.remove();
 		delete players[$this.id];
@@ -591,6 +615,7 @@ var Game = function(gameID) {
 				players[i].score -= 50;
 			}
 		}
+		that.play('laser');
 	};
 
 	proto.destroyConsole = function() {
@@ -599,7 +624,7 @@ var Game = function(gameID) {
 
 			this.speed = [0, 0];
 			this.moving = [0, 0];
-			this.moveValue = -this.moveValue;
+//			this.moveValue = -this.moveValue;
 
 			this.thingFb = true;
 
@@ -613,7 +638,7 @@ var Game = function(gameID) {
 				$this.pos[1] += Math.random() * 3 - 6;
 			}, function() {
 				$this.elka.removeClass('elka-frozen');
-				$this.moveValue = -$this.moveValue;
+				// $this.moveValue = -$this.moveValue;
 				$this.thingFb = false;
 			});
 		}
@@ -645,11 +670,13 @@ var Game = function(gameID) {
 	proto.playerTick = function() {
 		var prevPos = [this.pos[0], this.pos[1]];
 
+		$('#scores .' + this.color + '-text span').text(this.score);
+
 		// Устанавливаем текущую скорость
 		this.speed[0] += this.moving[0];
 		if (!this.moving[0] && this.speed[0]) {
 			var ws = this.speed[0] > 0;
-			this.speed[0] += this.speed[0] > 0 ? -this.moveValue * 5 : this.moveValue * 5;
+			this.speed[0] += this.speed[0] > 0 ? -this.moveValue * 500 : this.moveValue * 500;
 			if (ws && this.speed[0] < 0) this.speed[0] = 0;
 		}
 		if (this.speed[0] > this.max[0]) this.speed[0] = this.max[0]; if (this.speed[0] < -this.max[0]) this.speed[0] = -this.max[0];
@@ -657,7 +684,7 @@ var Game = function(gameID) {
 		this.speed[1] += this.moving[1];
 		if (!this.moving[1] && this.speed[1]) {
 			var ws = this.speed[1] > 0;
-			this.speed[1] += this.speed[1] > 0 ? -this.moveValue * 5 : this.moveValue * 5;
+			this.speed[1] += this.speed[1] > 0 ? -this.moveValue * 500 : this.moveValue * 500;
 			if (ws && this.speed[1] < 0) this.speed[1] = 0;
 		}
 		if (this.speed[1] > this.max[1]) this.speed[1] = this.max[1]; if (this.speed[1] < -this.max[1]) this.speed[1] = -this.max[1];
@@ -756,6 +783,15 @@ var Game = function(gameID) {
 			$('#game').hide();
 		});
 	}
+
+	this.play = function(name) {
+		var source = context.createBufferSource();
+
+		source.buffer = audios[name];
+		destination = context.destination;
+		source.connect(destination);
+		source.start(0);
+	}
 };
 
 $(function() {
@@ -773,17 +809,35 @@ $(function() {
 		socket.on('system', function(data) {
 			switch(data.status) {
 				case 'player-off':
-					$('#av_' + data.playerID).fadeOut(function() { $(this).remove(); });
+					$('#av_' + data.playerID).html('').attr({id: '', class: 'no-user'});
+					$('#scores ' + game.players[data.playerID].color + '-text').remove();
 					game.players[data.playerID].destroy();
+
+					$('.start_btn')[Object.keys(game.players).length ? 'removeClass' : 'addClass']('disabled');
+
+					if (gameStarted && !Object.keys(game.players).length)
+						top.location.reload;
+
 					break;
 
 				case 'new player':
-					$('.players_ico').append('<li id="av_' + data.playerID + '" class="' + data.color + ' authorization' + (data.pic ? '' : ' no_ava') + '">' +
-						(data.pic ? '<img src="' + data.pic + '" />' : '') + '</li>');
+					var pl = $('.players_ico .no-user:first');
+					pl.attr({
+						id: 'av_' + data.playerID,
+						class: data.color + ' authorization' + (data.pic ? '' : ' no_ava')
+					});
+
+					if (data.pic)
+						pl.html('<img src="' + data.pic + '" />');
 
 					game.newPlayer(data.playerID, data.color);
 					game.players[data.playerID].name = data.name || '';
 					game.players[data.playerID].pic = data.pic || '';
+
+					$('#scores tr').append('<td class="players_ico ' + data.color + '-text"><li class="' + data.color + ' authorization' + (data.pic ? '' : ' no_ava') + '">' +
+						(data.pic ? '<img src="' + data.pic + '" />' : '') + '</li><span>0</span></td>');
+
+					$('.start_btn')[Object.keys(game.players).length ? 'removeClass' : 'addClass']('disabled');
 					break;
 			}
 		});
@@ -868,24 +922,25 @@ $(function() {
 			nextElka.addClass('go_up');
 			setTimeout(goUpElkas, 200);
 		} else {
-			gameStart();
+			setTimeout(gameStart, 1000);
 		}
 	}
 
 	function gameStart() {
-		$('.first_screen').hide();
+		$('.first_screen').fadeOut(800, function() {
+			$('#game').fadeIn(function() {
+				game.startGame();
+				gameStarted = true;
 
-		$('#game').fadeIn();
-		game.startGame();
-		gameStarted = true;
+				setInterval(function() {
+					game.speedMultiplier += 0.5;
+				}, 60000);
 
-		setInterval(function() {
-			game.speedMultiplier += 0.5;
-		}, 10000);
-
-		setTimeout(function() {
-			game.endGame(gameID);
-		}, 60000);
+				setTimeout(function() {
+					game.endGame(gameID);
+				}, 180000);
+			});
+		});
 	}
 
 	$('.start_btn').click(function() {
@@ -894,6 +949,41 @@ $(function() {
 		$('.animate_wrap').addClass('startanimate');
 		setTimeout(intro, 2500);	
 	});
+
+	window.audios = {};
+	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+	context = new AudioContext(), source = context.createBufferSource();
+
+	var loadSoundFile = function(url, callback) {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/audio/' + url + '.mp3', true);
+		xhr.responseType = 'arraybuffer';
+		xhr.onload = function(e) {
+			context.decodeAudioData(this.response, function(decodedArrayBuffer) {
+				window.audios[url] = decodedArrayBuffer;
+				if (typeof callback == 'function')
+					callback(url);
+			});
+		};
+		xhr.send();
+	}
+
+	var loadSoundFiles = function(list) {
+		for (var i in list)
+			loadSoundFile(list[i], loadedSoundFile);
+	}
+
+	var loadedSoundFile = function(name) {
+		if (name == 'maintheme') {
+			source.buffer = audios[name];
+			destination = context.destination;
+			source.connect(destination);
+			source.loop = true;
+			source.start(0);
+		}
+	}
+
+	loadSoundFiles(['maintheme', 'ting', 'ting2', 'ting3', 'laser', 'take2', 'xmas_fast', 'wooff-wooff', 'ha-ha', 'ho-ho-ho', 'uskorenie', 'glass', 'boom1']);
 
 	// snow
 	/*

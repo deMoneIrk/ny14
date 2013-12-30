@@ -83,6 +83,7 @@ body.fade_second_screen.horizontal {
 	background: #FFE680;
 }
 
+
 /* Middle
 -----------------------------------------------------------------------------*/
 .content {
@@ -247,7 +248,7 @@ body.fade_second_screen.horizontal {
 	background: #9b59b6;
 }
 .game_pad.yellow {
-	background: #f39c12;
+	background: #f0a72f;
 }
 .stick {
 	width: 502px;
