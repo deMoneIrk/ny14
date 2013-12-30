@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<title>About the Game</title>
+	<link href="/promo/css/style.css" rel="stylesheet"/>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="/promo/js/function.js"></script>
+</head>
+
+<body style="background: #1e2d3a;">
+	<script>
+		$(function(){
+		
+			var i = 0;
+			function zoomAnimate(){
+				$('.zoom_animate').eq(i).addClass('fade');
+				var curItem = $('.zoom_animate').eq(i);
+				setTimeout(function(){
+					$(curItem).addClass('startAnimate');	
+				}, 800);
+				i++;
+				setTimeout(zoomAnimate, 100);	
+			}
+			zoomAnimate();
+		})
+	</script>
+	<div class="about_page">
+		<img src="/promo/img/about_h.png" class="about_h zoom_animate" />
+		<div class="about_page_block">
+			<div class="balls_block">
+				<img src="/promo/img/bals_1.png" class="bals_1 zoom_animate" />
+				<img src="/promo/img/bals_2.png" class="bals_2 zoom_animate" />
+				<img src="/promo/img/bals_3.png" class="bals_3 zoom_animate" />
+				<img src="/promo/img/balls_text.png" class="balls_text zoom_animate" />
+			</div>
+			
+			<div class="snowflake_block">
+				<img src="/promo/img/a_snowflake.png" class="a_snowflake zoom_animate" />
+				<img src="/promo/img/a_snowflake_text.png" class="a_snowflake_text zoom_animate" />
+			</div>
+			<div class="gremlin_block">
+				<img src="/promo/img/gremlin_text.png" class="gremlin_text zoom_animate" />
+				<img src="/promo/img/a_gremlin.png" class="a_gremlin zoom_animate" />
+			</div>
+			<div class="lightning_block">
+				<img src="/promo/img/a_lightning.png" class="a_lightning zoom_animate" />
+				<img src="/promo/img/a_lightning_text.png" class="a_lightning_text zoom_animate" />
+			</div>
+			<div class="angel_block">
+				<img src="/promo/img/a_angel.png" class="a_angel zoom_animate" />
+				<img src="/promo/img/angel_text.png" class="angel_text zoom_animate" />
+			</div>
+			<div class="shot_block">
+				<img src="/promo/img/a_shot_text.png" class="a_shot_text zoom_animate" />
+				<img src="/promo/img/a_shot_star.png" class="a_shot_star zoom_animate" />
+			</div>
+			<div class="box_block">
+				<img src="/promo/img/a_box.png" class="a_box zoom_animate" />
+				<img src="/promo/img/a_box_text.png" class="a_box_text zoom_animate" />
+			</div>
+			<div class="santa_block">
+				<img src="/promo/img/a_santa.png" class="a_santa zoom_animate" />
+				<img src="/promo/img/a_santa_text.png" class="a_santa_text zoom_animate" />
+			</div>
+			<a href="/" class="lets_play_big_btn zoom_animate"></a>
+		</div>
+		<ul class="menu"> <li><a href="/about.html" class="active">About game</a></li> <li><a href="/records.html">Records table</a></li> <li><a href="/developers.html">Developers</a></li><div class="clear_both"></div></ul>
+	</div>	
+</body>
+</html>

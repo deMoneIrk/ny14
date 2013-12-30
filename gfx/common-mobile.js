@@ -1,6 +1,6 @@
 var socket = io.connect('http://2014.studio38.ru:8089'), playerID, gameID;
 
-socket.emit('newPlayer');
+socket.emit('newPlayer', { iid: window.iid });
 socket.on('id', function(data) {
 	playerID = data.id;
 });
@@ -11,6 +11,7 @@ socket.on('system', function(data) {
 		case 'no game':
 			if (gameID) {
 				gameID = false;
+				top.location.reload();
 				gameStop();
 			}
 
@@ -63,14 +64,12 @@ socket.on('system', function(data) {
 var start = [], now, change = [0, 0];
 gameStart = function(color) {
 	var wh = [parseInt($('.stick i').width()) / 2, parseInt($('.stick i').height()) / 2], pos = [$('.stick i').position().left + wh[0], $('.stick i').position().top + wh[1]], max = 140;
-	socket.emit('iphone', { wh: wh, pos: pos });
 
 	$('body').addClass('fade_second_screen');
 	$('.first_screen, .second_screen').hide();
 	$('.game_pad').addClass(color).show();
 
 	$(document).on('touchstart touchmove touchend', function(e) { e.preventDefault(); });
-
 
 	$('.strike').on('touchstart', function(e) {
 		socket.emit('shot', { playerID: playerID, gameID: gameID });
@@ -110,7 +109,7 @@ gameStart = function(color) {
 
 		$('.stick i').css('transform', 'translate' + (Modernizr.csstransforms3d ? '3d' : '') + '(' + (-change[0]) + 'px, ' + (-change[1]) + 'px' + (Modernizr.csstransforms3d ? ', 0px' : '') + ')');
 
-		socket.emit('move', { playerID: playerID, gameID: gameID, speedX: -change[0], speedY: -change[1] });
+		// socket.emit('move', { playerID: playerID, gameID: gameID, speedX: -change[0], speedY: -change[1], iid: window.iid });
 	}).on('touchend', function(e) {
 		if (!started) return;
 
@@ -137,6 +136,8 @@ gameStop = function() {
 };
 
 $(function() {
+	if (window.iid) $('body').addClass('fade_second_screen');
+
 	if(window.orientation == -90 || window.orientation == 90 || window.orientation == undefined) {
 		$('body').addClass('horizontal');
 	} else {
@@ -150,6 +151,10 @@ $(function() {
 			$('body').removeClass('horizontal');
 		}
 	}, false);
+
+	$('.fb_btn').on('click', function() {
+		top.location.href = '/facebook';
+	});
 	
 	$('.play_inkognito_btn').click(function() {
 		$('body').addClass('fade_second_screen');
