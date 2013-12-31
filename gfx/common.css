@@ -101,6 +101,10 @@ canvas {
 	position: absolute;
 }
 
+.sound_ico {
+	z-index: 1000;
+}
+
 .star {
 	background-image: url(items.png);
 	background-position: -320px -447px;

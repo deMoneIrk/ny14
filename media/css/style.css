@@ -248,7 +248,7 @@ body.fade_second_screen.horizontal {
 	background: #9b59b6;
 }
 .game_pad.yellow {
-	background: #f0a72f;
+	background: #f8c73d;
 }
 .stick {
 	width: 502px;
@@ -289,29 +289,34 @@ body.fade_second_screen.horizontal {
 	background: #a93126;
 }
 .yellow .stick i {
-	background: #df781c;
+	background: #f39c12;
 }
 
 .strike {
-	width: 258px;
-	height: 258px;
+	width: 300px;
+	height: 300px;
 	position: absolute;
 	border-radius: 50%;
-	top: 190px;
-	left: 650px;
+	top: 150px;
+	left: 585px;
+	background-position: 50% 50%;
 }
 
 .green .strike  {
-	background: url(../img/strike_green.png);
+	background: url(../img/strike_green.png) 50% 50% no-repeat;
+
 }
 .blue .strike  {
-	background: url(../img/strike_blue.png);
+	background: url(../img/strike_blue.png) 50% 50% no-repeat;
+
 }
 .red .strike  {
-	background: url(../img/strike_red.png);
+	background: url(../img/strike_red.png) 50% 50% no-repeat;
+
 }
 .yellow .strike  {
-	background: url(../img/strike_yellow.png);
+	background: url(../img/strike_yellow.png) 50% 50% no-repeat;
+
 }
 
 

@@ -11,7 +11,6 @@ socket.on('system', function(data) {
 		case 'no game':
 			if (gameID) {
 				gameID = false;
-				top.location.reload();
 				gameStop();
 			}
 
@@ -127,9 +126,13 @@ window.sendData = function() {
 
 gameStop = function() {
 	clearInterval(window.sendData);
+	$('.game_pad').hide();
+	$('.last_screen').show();
+/*
 	$('body').removeClass('fade_second_screen');
 	$('.first_screen').show(); $('.second_screen').hide();
 	$('.game_pad').attr('class', 'game_pad').hide();
+*/
 	$(document).off('touchstart touchmove touchend');
 	$('.stick i').off('touchstart touchmove touchend');
 	$('.strike').off('touchstart');

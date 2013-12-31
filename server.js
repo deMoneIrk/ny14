@@ -32,8 +32,7 @@ function handleDisconnect() {
 			throw err;
 		}
 	});
-}
-handleDisconnect();
+} handleDisconnect();
 
 app.configure(function () {
 	app.use(express.cookieParser('2Zy2pGu2W6tcT9uKiYiG914SEcviEyGo'));
@@ -102,7 +101,8 @@ app.get('/records.html', function(req, res) {
 	cn.query('SELECT users.*, SUM(score) AS score FROM plays LEFT JOIN users ON plays.user_id = users.id GROUP BY user_id ORDER BY SUM(score) DESC LIMIT 0, 25', function(err, data) {
 		var html = '', records = fs.readFileSync('records.html').toString();
 		for (var i in data)
-			html += '<tr><td>' + (parseInt(i) + 1) + '.</td><td><div class="avatar"><img src="' + data[i].photo + '" /></div></td><td>' + escapeHtml(data[i].name) + '</td><td><div>' + data[i].score + '</div></td></tr>';
+			html += '<tr><td>' + (parseInt(i) + 1) + '.</td><td><a href="http://facebook.com/' + data[i].facebook_id + '" target="_blank" class="avatar"><img src="' + data[i].photo + '" /></a></td><td>' +
+				'<a href="http://facebook.com/' + data[i].facebook_id + '" target="_blank">' + escapeHtml(data[i].name) + '</a></td><td><div>' + data[i].score + '</div></td></tr>';
 
 		res.end(records.replace('#RECORDS#', html));
 	});
@@ -131,7 +131,23 @@ app.get('/', function(req, res) {
 	}
 });
 
+app.get('/stat', function(req, res) {
+	if (req.query.allowed) {
+		res.json({
+			games: Object.keys(games).length,
+			players: Object.keys(players).length,
+			sessions: Object.keys(userSessions).length
+		});
+	} else {
+		res.end(req.ip);
+	}
+});
+
 app.use(express.static(__dirname));
+
+app.use(function(req, res) {
+	res.redirect('/');
+});
 
 app.listen(8088);
 
@@ -139,19 +155,15 @@ io.enable('browser client minification');
 io.enable('browser client etag');
 io.enable('browser client gzip');
 io.set('origins', '2014.studio38.ru:*');
-// io.set('log level', 1);
+io.set('log level', 1);
 
 var games = {}, players = {};
 
 io.sockets.on('connection', function (socket) {
-	socket.on('iphone', function(data) {
-		console.log(data);
-	});
-
 	socket.on('newGame', function() {
 		var gameID;
 		do {
-			gameID = parseInt(getFloatRand(1, 10));
+			gameID = parseInt(getFloatRand(1000, 99999));
 		} while (typeof games[gameID] != 'undefined');
 
 		games[gameID] = {
@@ -189,6 +201,15 @@ io.sockets.on('connection', function (socket) {
 		socket.set('playerID', playerID);
 		socket.emit('id', res);
 	});
+
+	/*socket.on('game started', function(data) {
+		if (!games[data.gameID]) {
+			socket.emit('system', { status: 'no game' });
+			return false;
+		}
+
+		games[data.gameID].started = true;
+	});*/
 
 	socket.on('shot', function(data) {
 		if (!games[data.gameID]) {
