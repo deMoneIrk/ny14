@@ -140,8 +140,8 @@ gameStop = function() {
 };
 
 $(function() {
-	if (window.devicePixelRatio >= 2) {
-		$('#vp').attr('content', 'initial-scale=1, maximum-scale=1, user-scalable=no');
+	if (window.devicePixelRatio < 2) {
+		$('#vp').attr('content', 'initial-scale=0.5, maximum-scale=0.5, user-scalable=no');
 	}
 
 	if (window.iid) $('body').addClass('fade_second_screen');
