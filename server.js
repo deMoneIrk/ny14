@@ -246,6 +246,18 @@ io.sockets.on('connection', function (socket) {
 		}
 	});
 
+	socket.on('end game', function(data) {
+		if (!games[data.gameID]) {
+			socket.emit('system', { status: 'no game' });
+			return false;
+		}
+
+		for (var i in games[data.gameID].players) {
+			if (games[data.gameID].players[i].socket)
+				games[data.gameID].players[i].socket.emit('server', {status: 'end game'});
+		}
+	});
+
 	socket.on('move', function(data) {
 		if (!games[data.gameID]) {
 			socket.emit('system', { status: 'no game' });

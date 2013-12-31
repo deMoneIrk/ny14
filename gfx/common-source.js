@@ -778,6 +778,7 @@ var Game = function(gameID) {
 				(players[i].name || players[i].color + ' tree') + '</td><td>' + parseInt(players[i].score) + '</td></tr>'; // new_record
 		}
 
+		socket.emit('end game', { gameID: this.gameID });
 		if (Object.keys(pl).length) {
 			socket.emit('game results', { gameID: this.gameID, players: pl });
 		}

@@ -6,6 +6,7 @@
 	<!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	<title>Game Developers</title>
 	<link href="/promo/css/style.css" rel="stylesheet"/>
+	<script type="text/javascript" src="/gfx/jquery2.js"></script>
 
 	<meta property="og:locale" content="en_US" />
 	<meta property="og:title" content="Flying X-Mas Trees" />
@@ -15,7 +16,36 @@
 </head>
 
 <body style="background: #1b2f40;">
-	<div class="developers_screen ">
+	<script>
+		$(function(){
+			window.rnd = function(from, to) {
+				return Math.ceil(Math.random() * to + from);
+			};
+			if ($('.snowWrap').length > 0) {
+				var cnInnder = 0;
+				window.ciInnder = setInterval(function() {
+					var cnt = Math.ceil(Math.random() * 10);
+					for (var i = 0; i < cnt; i++) {
+						cnInnder = cnInnder + 1;
+						var l = Math.ceil(rnd(0, $(window).width())), t = Math.ceil(rnd(0, ($(window).height() / 6)));
+						$('.snowWrap').append('<i id="cnInnder' + cnInnder + '" class="snow" style="top: '+t+'px; left: ' + l + 'px"></i>');
+						var thisSnow = $('#cnInnder' + cnInnder);
+						$(thisSnow).animate({
+							left: l + parseInt((Math.random() - 0.5) * 6) * 32,
+							top: ($('.snowWrap').outerHeight() - 50)
+						}, 5000, 'linear', function() {
+							$(this).addClass('notransition').animate({
+								opacity: 0
+							}, function() {
+								$(this).remove();
+							});
+						}).addClass('fade');
+					}
+				}, 500);
+			}
+		})
+	</script>
+	<div class="developers_screen snowWrap">
 		<div class="developers_wrap">
 			<a href="http://studio38.ru/en/" class="dev_logo" target="_blank"><img src="/promo/img/dev_logo.png" /></a>
 			<img src="/promo/img/dev_h.png" class="dev_h" />

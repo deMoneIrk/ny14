@@ -8,6 +8,7 @@ socket.on('id', function(data) {
 socket.on('system', function(data) {
 	switch (data.status) {
 		case 'no places':
+		case 'end game':
 		case 'no game':
 			if (gameID) {
 				gameID = false;
@@ -139,6 +140,10 @@ gameStop = function() {
 };
 
 $(function() {
+	if (window.devicePixelRatio >= 2) {
+		$('#vp').attr('content', 'initial-scale=1, maximum-scale=1, user-scalable=no');
+	}
+
 	if (window.iid) $('body').addClass('fade_second_screen');
 
 	if(window.orientation == -90 || window.orientation == 90 || window.orientation == undefined) {
